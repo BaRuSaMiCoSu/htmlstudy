@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTMLラボ — インタラクティブHTML学習ツール</title>
+</head>
+<body>
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --panel: #FFFFFF;
+    --panel-2: #FBFAF6;
+    --ink: #2A241E;
+    --muted: #6E655B;
+    --line: #E5E0D6;
+    --accent: #D6491F;
+    --accent-ink: #B23A15;
+    --accent-soft: #FBE9E1;
+    --ok: #1F7A46;
+    --ok-soft: #E3F2E8;
+    --gold: #E8B93E;
+    --ed-bg: #241F1B;
+    --ed-head: #2E2823;
+    --ed-ink: #F2E9DF;
+    --ed-muted: #9C9083;
+    --shadow: 0 1px 2px rgba(42,36,30,.05), 0 4px 16px rgba(42,36,30,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1C1916;
+      --panel: #262220;
+      --panel-2: #2B2724;
+      --ink: #F0EAE2;
+      --muted: #A69C8F;
+      --line: #3A342E;
+      --accent: #FF7A45;
+      --accent-ink: #FF8F62;
+      --accent-soft: #3B281E;
+      --ok: #4CC57E;
+      --ok-soft: #223828;
+      --gold: #E8B93E;
+      --ed-bg: #171310;
+      --ed-head: #221D19;
+      --ed-ink: #F2E9DF;
+      --ed-muted: #8A7F73;
+      --shadow: 0 1px 2px rgba(0,0,0,.25), 0 4px 16px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #F5F3EE; --panel: #FFFFFF; --panel-2: #FBFAF6; --ink: #2A241E;
+    --muted: #6E655B; --line: #E5E0D6; --accent: #D6491F; --accent-ink: #B23A15;
+    --accent-soft: #FBE9E1; --ok: #1F7A46; --ok-soft: #E3F2E8; --gold: #E8B93E;
+    --ed-bg: #241F1B; --ed-head: #2E2823; --ed-ink: #F2E9DF; --ed-muted: #9C9083;
+    --shadow: 0 1px 2px rgba(42,36,30,.05), 0 4px 16px rgba(42,36,30,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #1C1916; --panel: #262220; --panel-2: #2B2724; --ink: #F0EAE2;
+    --muted: #A69C8F; --line: #3A342E; --accent: #FF7A45; --accent-ink: #FF8F62;
+    --accent-soft: #3B281E; --ok: #4CC57E; --ok-soft: #223828; --gold: #E8B93E;
+    --ed-bg: #171310; --ed-head: #221D19; --ed-ink: #F2E9DF; --ed-muted: #8A7F73;
+    --shadow: 0 1px 2px rgba(0,0,0,.25), 0 4px 16px rgba(0,0,0,.25);
+  }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", system-ui, sans-serif;
+    font-size: 14.5px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+  button { font: inherit; cursor: pointer; }
+  :is(button, a, textarea, summary):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ── Header ─────────────────────────────── */
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 20px; height: 58px; flex: none;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo-mark {
+    width: 30px; height: 30px; flex: none;
+    display: grid; place-items: center;
+    background: var(--accent); color: #fff;
+    border-radius: 7px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; font-weight: 700; letter-spacing: -.5px;
+  }
+  .logo-text { line-height: 1.25; }
+  .logo-text strong { font-size: 15.5px; font-weight: 800; letter-spacing: .01em; }
+  .logo-text span { display: block; font-size: 11px; color: var(--muted); }
+  .topbar-spacer { flex: 1; }
+  .progress-chip {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 700; color: var(--muted);
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-chip .bar {
+    width: 64px; height: 6px; border-radius: 3px;
+    background: var(--line); overflow: hidden;
+  }
+  .progress-chip .bar i {
+    display: block; height: 100%; width: 0%;
+    background: var(--ok); border-radius: 3px;
+    transition: width .4s ease;
+  }
+
+  /* ── Main split ─────────────────────────── */
+  .main {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(340px, 430px) 1fr;
+  }
+
+  /* Left rail */
+  .rail {
+    min-height: 0; overflow-y: auto;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    border-right: 1px solid var(--line);
+  }
+  .step-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+  .step-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 13px 7px 8px;
+    border: 1.5px solid var(--line); border-radius: 999px;
+    background: var(--panel); color: var(--muted);
+    font-size: 12.5px; font-weight: 700;
+  }
+  .step-pill .num {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--panel-2); border: 1px solid var(--line);
+    font-size: 11px; font-variant-numeric: tabular-nums;
+  }
+  .step-pill.active {
+    border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink);
+  }
+  .step-pill.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step-pill.done .num { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .step-pill:disabled { opacity: .5; cursor: not-allowed; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Lesson */
+  .lesson { padding: 22px 24px 24px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: .14em;
+    color: var(--accent-ink); text-transform: uppercase;
+  }
+  .lesson h2 {
+    margin: 6px 0 14px; font-size: 21px; font-weight: 800;
+    line-height: 1.4; letter-spacing: .01em; text-wrap: balance;
+  }
+  .lesson p { margin: 0 0 12px; line-height: 1.9; max-width: 42em; }
+  .lesson p:last-child { margin-bottom: 0; }
+  .lesson code {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: .92em;
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 5px; padding: 1px 5px;
+    color: var(--accent-ink);
+  }
+  .lesson pre {
+    margin: 14px 0; padding: 14px 16px;
+    background: var(--ed-bg); color: var(--ed-ink);
+    border-radius: 10px; overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px; line-height: 1.8; tab-size: 2;
+  }
+  .lesson pre .t { color: #FF9E6B; }      /* tag */
+  .lesson pre .a { color: #E8C56B; }      /* attribute */
+  .lesson pre .c { color: #8A7F73; }      /* comment */
+  .note {
+    margin: 14px 0 0; padding: 10px 14px;
+    background: var(--panel-2); border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px; color: var(--muted); line-height: 1.8;
+  }
+
+  /* Task checklist */
+  .task { padding: 18px 24px 20px; }
+  .task-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .task-head h3 { margin: 0; font-size: 15px; font-weight: 800; }
+  .task-head .sub { font-size: 12px; color: var(--muted); }
+  .task .goal { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); line-height: 1.8; }
+  .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .checks li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 12px; border-radius: 9px;
+    background: var(--panel-2); border: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .checks li .mark {
+    width: 20px; height: 20px; flex: none; margin-top: 2px;
+    border-radius: 50%; border: 1.5px solid var(--line);
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 800; color: transparent;
+    transition: all .25s ease;
+  }
+  .checks li.pass { background: var(--ok-soft); border-color: transparent; color: var(--ink); }
+  .checks li.pass .mark { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .checks li b {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-weight: 600; font-size: .95em;
+  }
+  .task details { margin-top: 14px; }
+  .task summary {
+    font-size: 12.5px; font-weight: 700; color: var(--muted);
+    cursor: pointer; user-select: none; width: fit-content;
+  }
+  .task summary:hover { color: var(--accent-ink); }
+  .task details pre {
+    margin: 10px 0 0; padding: 12px 14px;
+    background: var(--ed-bg); color: var(--ed-ink);
+    border-radius: 10px; overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px; line-height: 1.8;
+  }
+
+  .clear-banner {
+    display: none;
+    margin-top: 14px; padding: 13px 16px;
+    background: var(--ok-soft); border: 1px solid var(--ok);
+    border-radius: 10px;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .clear-banner.show { display: flex; }
+  .clear-banner .msg { font-size: 13.5px; font-weight: 800; color: var(--ok); flex: 1; min-width: 12em; }
+  .btn-next {
+    border: none; border-radius: 8px;
+    background: var(--ok); color: #fff;
+    font-size: 13px; font-weight: 800;
+    padding: 8px 16px;
+  }
+  .btn-next:hover { filter: brightness(1.08); }
+
+  /* Right workbench */
+  .bench {
+    min-height: 0; min-width: 0;
+    display: grid; grid-template-rows: 1fr 1fr; gap: 14px;
+    padding: 20px;
+  }
+  .panel {
+    min-height: 0; display: flex; flex-direction: column;
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+  .panel-head {
+    flex: none; height: 40px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 14px;
+    font-size: 12px; font-weight: 700;
+  }
+  .editor-panel { background: var(--ed-bg); border-color: transparent; }
+  .editor-panel .panel-head { background: var(--ed-head); color: var(--ed-muted); }
+  .file-chip {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px; color: var(--ed-ink);
+    background: var(--ed-bg); border-radius: 6px 6px 0 0;
+    padding: 10px 14px 9px; margin-bottom: -11px; align-self: flex-end;
+    border-bottom: 2px solid var(--accent);
+  }
+  .panel-head .spacer { flex: 1; }
+  .btn-ghost {
+    border: 1px solid rgba(255,255,255,.14); border-radius: 6px;
+    background: transparent; color: var(--ed-muted);
+    font-size: 11.5px; font-weight: 700; padding: 4px 10px;
+  }
+  .btn-ghost:hover { color: var(--ed-ink); border-color: rgba(255,255,255,.3); }
+  .editor-panel textarea {
+    flex: 1; width: 100%; min-height: 0;
+    border: none; resize: none; outline: none;
+    background: var(--ed-bg); color: var(--ed-ink);
+    caret-color: var(--accent);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13.5px; line-height: 1.75; tab-size: 2;
+    padding: 14px 18px;
+  }
+  .editor-panel textarea::placeholder { color: var(--ed-muted); }
+
+  .preview-panel { background: #fff; }
+  .preview-panel .panel-head {
+    background: var(--panel); color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .dots { display: inline-flex; gap: 5px; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .url-bar {
+    flex: 1; max-width: 340px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 3px 12px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ok); flex: none;
+    animation: pulse 2.4s ease infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
+  .preview-panel iframe { flex: 1; width: 100%; min-height: 0; border: none; background: #fff; }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed; top: -24px; z-index: 99;
+    pointer-events: none;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall {
+    to { transform: translateY(108vh) rotate(620deg); opacity: .9; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .confetti-piece { display: none; }
+    .live-dot { animation: none; }
+    .checks li, .checks li .mark, .progress-chip .bar i { transition: none; }
+  }
+
+  /* Responsive */
+  @media (max-width: 920px) {
+    .app { height: auto; min-height: 100vh; }
+    .main { grid-template-columns: 1fr; }
+    .rail { border-right: none; border-bottom: 1px solid var(--line); overflow: visible; }
+    .bench { grid-template-rows: none; }
+    .editor-panel textarea { min-height: 260px; }
+    .preview-panel iframe { min-height: 320px; }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="logo-mark" aria-hidden="true">&lt;/&gt;</div>
+    <div class="logo-text">
+      <strong>HTMLラボ</strong>
+      <span>書いたコードが、すぐ動く。</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="progress-chip" id="progressChip">
+      <span id="progressText">クリア 0 / 2</span>
+      <span class="bar"><i id="progressBar"></i></span>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="rail">
+      <nav class="step-nav" id="stepNav" aria-label="学習ステップ"></nav>
+
+      <article class="card lesson" id="lessonCard"></article>
+
+      <section class="card task" aria-label="課題">
+        <div class="task-head">
+          <h3 id="taskTitle">課題</h3>
+          <span class="sub">コードを書くと自動で判定されます</span>
+        </div>
+        <p class="goal" id="taskGoal"></p>
+        <ul class="checks" id="checkList" aria-live="polite"></ul>
+        <details id="hintBox">
+          <summary>ヒントを見る（書き方の例）</summary>
+          <pre id="hintCode"></pre>
+        </details>
+        <div class="clear-banner" id="clearBanner">
+          <span class="msg" id="clearMsg">クリア！ 🎉</span>
+          <button class="btn-next" id="nextBtn" type="button">次のステップへ →</button>
+        </div>
+      </section>
+    </aside>
+
+    <section class="bench" aria-label="エディタとプレビュー">
+      <div class="panel editor-panel">
+        <div class="panel-head">
+          <span>エディタ</span>
+          <span class="file-chip">index.html</span>
+          <span class="spacer"></span>
+          <button class="btn-ghost" id="resetBtn" type="button">最初のコードに戻す</button>
+        </div>
+        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
+          aria-label="HTMLコード入力エリア" placeholder="ここにHTMLを書いてみよう"></textarea>
+      </div>
+
+      <div class="panel preview-panel">
+        <div class="panel-head">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="url-bar">htmllab.local/index.html</span>
+          <span class="spacer"></span>
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>ライブプレビュー</span>
+        </div>
+        <iframe id="preview" title="プレビュー" sandbox="allow-scripts"></iframe>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── ステップ定義 ─────────────────────── */
+  var STEPS = [
+    {
+      id: 1,
+      label: "見出しと段落",
+      eyebrow: "Step 1 / Basic Structure",
+      title: "見出しと段落 — ページの骨組みをつくる",
+      lesson: [
+        "<p>HTMLは、文章に「これは見出し」「これは段落」と<strong>名前（タグ）をつけていく</strong>言語です。タグは <code>&lt;p&gt;</code> のような開始タグと <code>&lt;/p&gt;</code> のような終了タグで、内容をはさんで使います。</p>",
+        "<pre><span class='t'>&lt;p&gt;</span>こんにちは！<span class='t'>&lt;/p&gt;</span></pre>",
+        "<p>見出しには <code>&lt;h1&gt;</code>〜<code>&lt;h6&gt;</code> を使います。<code>&lt;h1&gt;</code> がいちばん大きな「大見出し」で、数字が増えるほど小さくなります。段落（ふつうの文章）は <code>&lt;p&gt;</code> です。</p>",
+        "<pre><span class='c'>&lt;!-- 自己紹介ページの例 --&gt;</span>\n<span class='t'>&lt;h1&gt;</span>山田太郎のページ<span class='t'>&lt;/h1&gt;</span>\n<span class='t'>&lt;h2&gt;</span>好きなこと<span class='t'>&lt;/h2&gt;</span>\n<span class='t'>&lt;p&gt;</span>週末はパン作りをしています。<span class='t'>&lt;/p&gt;</span>\n<span class='t'>&lt;p&gt;</span>最近は クロワッサン に挑戦中です。<span class='t'>&lt;/p&gt;</span></pre>",
+        "<div class='note'>💡 <code>&lt;!-- --&gt;</code> はコメントといって、画面には表示されないメモです。エディタに書いて試してみてください。</div>"
+      ].join(""),
+      goal: "右のエディタで「自己紹介ページ」を作ってみましょう。内容は自由です！",
+      checks: [
+        { html: "<b>&lt;h1&gt;</b> で大見出しを1つ書く（中に文字を入れる）",
+          test: function (d) { var el = d.querySelector("h1"); return !!el && el.textContent.trim().length > 0; } },
+        { html: "<b>&lt;h2&gt;</b> で小見出しを書く",
+          test: function (d) { var el = d.querySelector("h2"); return !!el && el.textContent.trim().length > 0; } },
+        { html: "<b>&lt;p&gt;</b> で段落を2つ以上書く",
+          test: function (d) {
+            var n = 0, ps = d.querySelectorAll("p");
+            for (var i = 0; i < ps.length; i++) if (ps[i].textContent.trim()) n++;
+            return n >= 2;
+          } }
+      ],
+      hint: "<h1>山田太郎のページ</h1>\n<h2>好きなこと</h2>\n<p>週末はパン作りをしています。</p>\n<p>最近はクロワッサンに挑戦中です。</p>",
+      starter: "<!-- ここに自己紹介ページを書いてみよう。まずは <h1> から！ -->\n\n"
+    },
+    {
+      id: 2,
+      label: "リンクと画像",
+      eyebrow: "Step 2 / Links & Images",
+      title: "リンクと画像 — ページの外とつながる",
+      lesson: [
+        "<p>リンクは <code>&lt;a&gt;</code> タグで作ります。<strong>属性</strong>という「タグへの追加情報」を使うのがポイントで、<code>href</code> 属性にリンク先のURLを書きます。</p>",
+        "<pre><span class='t'>&lt;a</span> <span class='a'>href</span>=<span class='a'>\"https://example.com\"</span><span class='t'>&gt;</span>おすすめのサイト<span class='t'>&lt;/a&gt;</span></pre>",
+        "<p>画像は <code>&lt;img&gt;</code> タグです。終了タグがない「空要素」で、<code>src</code> 属性に画像ファイル名を、<code>alt</code> 属性に「画像の説明」を書きます。<code>alt</code> は画像が表示できないときや、目の不自由な人が読み上げソフトを使うときに使われる、とても大切な属性です。</p>",
+        "<pre><span class='t'>&lt;img</span> <span class='a'>src</span>=<span class='a'>\"cat.jpg\"</span> <span class='a'>alt</span>=<span class='a'>\"ひなたぼっこする猫\"</span><span class='t'>&gt;</span></pre>",
+        "<div class='note'>💡 このラボでは、画像ファイルが見つからないときは自動でダミー画像が表示されます。<code>src=\"cat.jpg\"</code> のように、好きなファイル名を書いてOKです。</div>"
+      ].join(""),
+      goal: "「わたしの好きなもの」紹介ページに、リンクと画像を追加してみましょう。",
+      checks: [
+        { html: "<b>&lt;a&gt;</b> でリンクを作る（<b>href</b> とリンクの文字を入れる）",
+          test: function (d) {
+            var as = d.querySelectorAll("a");
+            for (var i = 0; i < as.length; i++) {
+              var href = as[i].getAttribute("href");
+              if (href && href.trim() && as[i].textContent.trim()) return true;
+            }
+            return false;
+          } },
+        { html: "<b>&lt;img&gt;</b> で画像を入れる（<b>src</b> にファイル名を書く）",
+          test: function (d) {
+            var im = d.querySelectorAll("img");
+            for (var i = 0; i < im.length; i++) {
+              var src = im[i].getAttribute("src");
+              if (src && src.trim()) return true;
+            }
+            return false;
+          } },
+        { html: "画像に <b>alt</b> で説明をつける",
+          test: function (d) {
+            var im = d.querySelectorAll("img");
+            for (var i = 0; i < im.length; i++) {
+              var alt = im[i].getAttribute("alt");
+              if (alt && alt.trim()) return true;
+            }
+            return false;
+          } }
+      ],
+      hint: "<h1>わたしの好きなもの</h1>\n<p>いちばん好きなサイトはここです。</p>\n<a href=\"https://example.com\">おすすめのサイト</a>\n<img src=\"cat.jpg\" alt=\"ひなたぼっこする猫\">",
+      starter: "<h1>わたしの好きなもの</h1>\n<!-- ここにリンクと画像を追加しよう -->\n\n"
+    }
+  ];
+  var COMING_SOON = { id: 3, label: "リストとテーブル（準備中）" };
+
+  /* ── 状態と保存 ───────────────────────── */
+  var KEY = "htmllab-v1";
+  var state = { current: 1, cleared: {}, code: {} };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && saved.code) state = saved;
+  } catch (e) { /* 保存データが壊れていたら初期状態から */ }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* プライベートモード等では保存しない */ }
+  }
+
+  /* ── 要素 ─────────────────────────────── */
+  var $ = function (id) { return document.getElementById(id); };
+  var editor = $("editor"), preview = $("preview");
+  var stepNav = $("stepNav"), lessonCard = $("lessonCard");
+  var taskGoal = $("taskGoal"), checkList = $("checkList");
+  var hintCode = $("hintCode"), clearBanner = $("clearBanner"), clearMsg = $("clearMsg");
+  var nextBtn = $("nextBtn"), resetBtn = $("resetBtn");
+  var progressText = $("progressText"), progressBar = $("progressBar");
+
+  function currentStep() {
+    for (var i = 0; i < STEPS.length; i++) if (STEPS[i].id === state.current) return STEPS[i];
+    return STEPS[0];
+  }
+
+  /* ── プレビュー ───────────────────────── */
+  function buildPreviewDoc(code) {
+    var fallback =
+      "document.addEventListener('error',function(e){" +
+      "var t=e.target;" +
+      "if(t&&t.tagName==='IMG'&&!t.__fb){t.__fb=1;" +
+      "var name=(t.getAttribute('src')||'image').replace(/[<>&\"']/g,'').slice(0,24);" +
+      "var svg='<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"190\">'+" +
+      "'<rect width=\"300\" height=\"190\" rx=\"8\" fill=\"#FBE9E1\"/>'+" +
+      "'<circle cx=\"78\" cy=\"62\" r=\"20\" fill=\"#E8B93E\"/>'+" +
+      "'<polygon points=\"36,158 118,84 172,136 214,98 268,158\" fill=\"#D6491F\" opacity=\"0.55\"/>'+" +
+      "'<text x=\"150\" y=\"178\" font-size=\"12\" text-anchor=\"middle\" fill=\"#8A5A48\" font-family=\"sans-serif\">'+name+' （ダミー画像）</text>'+" +
+      "'</svg>';" +
+      "t.src='data:image/svg+xml;utf8,'+encodeURIComponent(svg);}},true);";
+    return "<!DOCTYPE html><html lang=\"ja\"><head><meta charset=\"utf-8\"><style>" +
+      "body{font-family:'Hiragino Sans','Noto Sans JP',system-ui,sans-serif;color:#2A241E;background:#fff;" +
+      "padding:20px 24px;line-height:1.85;font-size:15px}" +
+      "img{max-width:100%}a{color:#C2410C}" +
+      "table{border-collapse:collapse}td,th{border:1px solid #D8D2C6;padding:6px 12px}" +
+      "</style></head><body>" + code +
+      "<scr" + "ipt>" + fallback + "</scr" + "ipt></body></html>";
+  }
+
+  /* ── 描画 ─────────────────────────────── */
+  function renderNav() {
+    stepNav.innerHTML = "";
+    STEPS.forEach(function (s) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "step-pill" +
+        (s.id === state.current ? " active" : "") +
+        (state.cleared[s.id] ? " done" : "");
+      b.innerHTML = "<span class='num'>" + (state.cleared[s.id] ? "✓" : s.id) + "</span>" + s.label;
+      b.setAttribute("aria-current", s.id === state.current ? "step" : "false");
+      b.addEventListener("click", function () { openStep(s.id); });
+      stepNav.appendChild(b);
+    });
+    var soon = document.createElement("button");
+    soon.type = "button";
+    soon.className = "step-pill";
+    soon.disabled = true;
+    soon.innerHTML = "<span class='num'>" + COMING_SOON.id + "</span>" + COMING_SOON.label;
+    stepNav.appendChild(soon);
+  }
+
+  function renderProgress() {
+    var done = 0;
+    STEPS.forEach(function (s) { if (state.cleared[s.id]) done++; });
+    progressText.textContent = "クリア " + done + " / " + STEPS.length;
+    progressBar.style.width = (done / STEPS.length * 100) + "%";
+  }
+
+  function renderChecks(results) {
+    checkList.innerHTML = "";
+    currentStep().checks.forEach(function (c, i) {
+      var li = document.createElement("li");
+      li.className = results[i] ? "pass" : "";
+      li.innerHTML = "<span class='mark'>✓</span><span>" + c.html + "</span>";
+      checkList.appendChild(li);
+    });
+  }
+
+  /* ── 判定 ─────────────────────────────── */
+  var parser = new DOMParser();
+  function evaluate() {
+    var step = currentStep();
+    var doc = parser.parseFromString(editor.value, "text/html");
+    var results = step.checks.map(function (c) {
+      try { return !!c.test(doc); } catch (e) { return false; }
+    });
+    renderChecks(results);
+
+    var all = results.length > 0 && results.every(function (r) { return r; });
+    if (all && !state.cleared[step.id]) {
+      state.cleared[step.id] = true;
+      save();
+      renderNav();
+      renderProgress();
+      celebrate();
+    }
+    updateBanner(all);
+  }
+
+  function updateBanner(allPass) {
+    var step = currentStep();
+    var show = allPass || state.cleared[step.id];
+    clearBanner.classList.toggle("show", !!show);
+    if (!show) return;
+    var isLast = step.id === STEPS[STEPS.length - 1].id;
+    if (isLast) {
+      var allDone = STEPS.every(function (s) { return state.cleared[s.id]; });
+      clearMsg.textContent = allDone
+        ? "全ステップクリア！おつかれさまでした 🎉"
+        : "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
+      nextBtn.style.display = "none";
+    } else {
+      clearMsg.textContent = "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
+      nextBtn.style.display = "";
+    }
+  }
+
+  /* ── 紙吹雪 ───────────────────────────── */
+  function celebrate() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var colors = ["#D6491F", "#E8B93E", "#1F7A46", "#FF9E6B", "#2A6FB0"];
+    for (var i = 0; i < 44; i++) {
+      var p = document.createElement("i");
+      p.className = "confetti-piece";
+      p.style.left = (Math.random() * 100) + "vw";
+      p.style.width = (6 + Math.random() * 7) + "px";
+      p.style.height = (10 + Math.random() * 8) + "px";
+      p.style.background = colors[i % colors.length];
+      p.style.borderRadius = Math.random() < 0.4 ? "50%" : "2px";
+      p.style.animationDuration = (0.9 + Math.random() * 0.9) + "s";
+      p.style.animationDelay = (Math.random() * 0.25) + "s";
+      document.body.appendChild(p);
+      setTimeout(function (el) { return function () { el.remove(); }; }(p), 2200);
+    }
+  }
+
+  /* ── ステップ切り替え ─────────────────── */
+  function openStep(id) {
+    state.current = id;
+    save();
+    var step = currentStep();
+    lessonCard.innerHTML =
+      "<div class='eyebrow'>" + step.eyebrow + "</div>" +
+      "<h2>" + step.title + "</h2>" + step.lesson;
+    taskGoal.textContent = step.goal;
+    hintCode.textContent = step.hint;
+    $("hintBox").open = false;
+    editor.value = (state.code[id] != null) ? state.code[id] : step.starter;
+    renderNav();
+    renderProgress();
+    refresh(true);
+  }
+
+  /* ── 入力 → 反映（軽いデバウンス） ─────── */
+  var timer = null;
+  function refresh(immediate) {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      state.code[state.current] = editor.value;
+      save();
+      preview.srcdoc = buildPreviewDoc(editor.value);
+      evaluate();
+    }, immediate ? 0 : 180);
+  }
+
+  editor.addEventListener("input", function () { refresh(false); });
+  editor.addEventListener("keydown", function (e) {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      var s = editor.selectionStart, t = editor.selectionEnd;
+      editor.value = editor.value.slice(0, s) + "  " + editor.value.slice(t);
+      editor.selectionStart = editor.selectionEnd = s + 2;
+      refresh(false);
+    }
+  });
+  resetBtn.addEventListener("click", function () {
+    editor.value = currentStep().starter;
+    refresh(true);
+    editor.focus();
+  });
+  nextBtn.addEventListener("click", function () {
+    var idx = STEPS.findIndex(function (s) { return s.id === state.current; });
+    if (idx < STEPS.length - 1) openStep(STEPS[idx + 1].id);
+  });
+
+  /* ── 起動 ─────────────────────────────── */
+  openStep(state.current === 2 ? 2 : 1);
+})();
+</script>
+</body>
+</html>
