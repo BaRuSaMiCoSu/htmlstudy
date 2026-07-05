@@ -78,7 +78,7 @@
   }
   * { box-sizing: border-box; }
   button { font: inherit; cursor: pointer; }
-  :is(button, a, textarea, summary):focus-visible {
+  :is(button, a, textarea, input, summary):focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 6px;
@@ -165,8 +165,7 @@
   .step-pill.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
   .step-pill.done .num { background: var(--ok); border-color: var(--ok); color: #fff; }
   .step-pill.free { border-style: dashed; }
-  .step-pill.free .num { background: var(--gold-soft); border-color: var(--gold); font-size: 12px; }
-  .step-pill:disabled { opacity: .5; cursor: not-allowed; }
+  .step-pill.free .num, .step-pill.mode .num { background: var(--gold-soft); border-color: var(--gold); font-size: 12px; }
 
   .card {
     background: var(--panel);
@@ -212,11 +211,25 @@
     font-size: 13px; color: var(--muted); line-height: 1.8;
   }
 
+  /* チャレンジ */
+  .ch-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .target-frame {
+    margin: 14px 0 0;
+    border: 1.5px solid var(--line); border-radius: 10px;
+    overflow: hidden; background: #fff;
+  }
+  .target-head {
+    padding: 7px 12px;
+    background: var(--gold-soft); border-bottom: 1px solid var(--line);
+    font-size: 12px; font-weight: 800; color: var(--ink);
+  }
+  .target-frame iframe { display: block; width: 100%; height: 240px; border: 0; background: #fff; }
+
   /* Task checklist */
   .task { padding: 18px 24px 20px; }
   .task-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
   .task-head h3 { margin: 0; font-size: 15px; font-weight: 800; }
-  .task-head .sub { font-size: 12px; color: var(--muted); }
+  .task-head .sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .task .goal { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); line-height: 1.8; }
   .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   .checks li {
@@ -293,6 +306,47 @@
   }
   .btn-next:hover { filter: brightness(1.08); }
 
+  /* 作品棚 */
+  .works { padding: 18px 24px 20px; }
+  .works-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+  .works-head h3 { margin: 0; font-size: 15px; font-weight: 800; }
+  .works-head .sub { font-size: 12px; color: var(--muted); }
+  .work-name {
+    width: 100%; margin-bottom: 10px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel-2); color: var(--ink);
+    font: inherit; font-size: 13px; font-weight: 700;
+    padding: 7px 11px;
+  }
+  .works-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .work-card {
+    position: relative; padding: 0; text-align: left;
+    border: 1.5px solid var(--line); border-radius: 10px;
+    overflow: hidden; background: var(--panel);
+  }
+  .work-card.active { border-color: var(--accent); }
+  .work-thumb { width: 100%; height: 88px; overflow: hidden; background: #fff; pointer-events: none; }
+  .work-thumb iframe {
+    width: 400%; height: 400%; border: 0;
+    transform: scale(.25); transform-origin: 0 0;
+    pointer-events: none;
+  }
+  .work-meta {
+    display: block; padding: 5px 9px;
+    background: var(--panel-2); border-top: 1px solid var(--line);
+    font-size: 11.5px; font-weight: 700; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .work-card.active .work-meta { color: var(--accent-ink); }
+  .works-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-small {
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel-2); color: var(--muted);
+    font-size: 12px; font-weight: 700; padding: 6px 12px;
+  }
+  .btn-small:hover { color: var(--accent-ink); border-color: var(--accent); }
+  .btn-small.armed { color: #fff; background: #C0392B; border-color: #C0392B; }
+
   /* Right workbench */
   .bench {
     min-height: 0; min-width: 0;
@@ -318,7 +372,7 @@
     border: none; background: transparent;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 11.5px; color: var(--ed-muted);
-    padding: 10px 14px 9px;
+    padding: 10px 12px 9px;
     border-bottom: 2px solid transparent;
     border-radius: 6px 6px 0 0;
   }
@@ -415,7 +469,7 @@
     <div class="topbar-spacer"></div>
     <div class="badges" id="badgeRow" aria-label="獲得バッジ"></div>
     <div class="progress-chip" id="progressChip">
-      <span id="progressText">クリア 0 / 6</span>
+      <span id="progressText">クリア 0 / 8</span>
       <span class="bar"><i id="progressBar"></i></span>
     </div>
   </header>
@@ -442,12 +496,27 @@
           <ul id="adviceList"></ul>
         </div>
         <details id="hintBox">
-          <summary>ヒントを見る（書き方の例）</summary>
+          <summary id="hintSummary">ヒントを見る（書き方の例）</summary>
           <pre id="hintCode"></pre>
         </details>
         <div class="clear-banner" id="clearBanner">
           <span class="msg" id="clearMsg">クリア！ 🎉</span>
           <button class="btn-next" id="nextBtn" type="button">次のステップへ →</button>
+        </div>
+      </section>
+
+      <section class="card works" id="worksCard" hidden aria-label="作品棚">
+        <div class="works-head">
+          <h3>🗂 作品棚</h3>
+          <span class="sub" id="worksCount"></span>
+        </div>
+        <input class="work-name" id="workName" type="text" maxlength="40" aria-label="作品名">
+        <div class="works-grid" id="worksGrid"></div>
+        <div class="works-actions">
+          <button class="btn-small" id="newWorkBtn" type="button">＋ 新しい作品</button>
+          <button class="btn-small" id="dupWorkBtn" type="button">⧉ 複製</button>
+          <button class="btn-small" id="dlWorkBtn" type="button">💾 HTMLをダウンロード</button>
+          <button class="btn-small" id="delWorkBtn" type="button">🗑 削除</button>
         </div>
       </section>
     </aside>
@@ -459,6 +528,7 @@
           <div class="file-tabs" role="tablist">
             <button class="file-chip active" id="tabHtml" type="button" role="tab" aria-selected="true">index.html</button>
             <button class="file-chip" id="tabCss" type="button" role="tab" aria-selected="false">style.css</button>
+            <button class="file-chip" id="tabJs" type="button" role="tab" aria-selected="false">script.js</button>
           </div>
           <span class="spacer"></span>
           <button class="btn-ghost" id="resetBtn" type="button">最初のコードに戻す</button>
@@ -481,6 +551,8 @@
   </div>
 </div>
 
+<iframe id="judge" title="判定用（非表示）" sandbox="allow-scripts" tabindex="-1"
+  style="position:fixed;left:-9999px;top:0;width:320px;height:240px;border:0;opacity:0;pointer-events:none"></iframe>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -488,6 +560,7 @@
   "use strict";
 
   var DEFAULT_CSS = "/* style.css — CSSはStep 5で学びます。先に書いてみてもOK！ */\n";
+  var DEFAULT_JS = "// script.js — JavaScriptはStep 7で学びます。先に書いてみてもOK！\n";
 
   /* ── ステップ定義 ─────────────────────── */
   var STEPS = [
@@ -517,7 +590,7 @@
           } }
       ],
       hint: "<h1>山田太郎のページ</h1>\n<h2>好きなこと</h2>\n<p>週末はパン作りをしています。</p>\n<p>最近はクロワッサンに挑戦中です。</p>",
-      starter: { h: "<!-- ここに自己紹介ページを書いてみよう。まずは <h1> から！ -->\n\n", c: DEFAULT_CSS }
+      starter: { h: "<!-- ここに自己紹介ページを書いてみよう。まずは <h1> から！ -->\n\n", c: DEFAULT_CSS, j: DEFAULT_JS }
     },
     {
       id: 2,
@@ -562,7 +635,7 @@
           } }
       ],
       hint: "<h1>わたしの好きなもの</h1>\n<p>いちばん好きなサイトはここです。</p>\n<a href=\"https://example.com\">おすすめのサイト</a>\n<img src=\"cat.jpg\" alt=\"ひなたぼっこする猫\">",
-      starter: { h: "<h1>わたしの好きなもの</h1>\n<!-- ここにリンクと画像を追加しよう -->\n\n", c: DEFAULT_CSS }
+      starter: { h: "<h1>わたしの好きなもの</h1>\n<!-- ここにリンクと画像を追加しよう -->\n\n", c: DEFAULT_CSS, j: DEFAULT_JS }
     },
     {
       id: 3,
@@ -593,7 +666,7 @@
           } }
       ],
       hint: "<h2>ベスト3</h2>\n<ul>\n  <li>寿司</li>\n  <li>ラーメン</li>\n  <li>カレー</li>\n</ul>\n<table>\n  <tr><th>名前</th><th>点数</th></tr>\n  <tr><td>寿司</td><td>95点</td></tr>\n</table>",
-      starter: { h: "<h1>好きな食べもの ランキング</h1>\n<!-- ここにリストと表を作ってみよう -->\n\n", c: DEFAULT_CSS }
+      starter: { h: "<h1>好きな食べもの ランキング</h1>\n<!-- ここにリストと表を作ってみよう -->\n\n", c: DEFAULT_CSS, j: DEFAULT_JS }
     },
     {
       id: 4,
@@ -605,7 +678,7 @@
         "<pre><span class='t'>&lt;input</span> <span class='a'>type</span>=<span class='a'>\"text\"</span> <span class='a'>placeholder</span>=<span class='a'>\"山田太郎\"</span><span class='t'>&gt;</span></pre>",
         "<p><code>&lt;label&gt;</code> は入力欄の「名前ふだ」、<code>&lt;button&gt;</code> はボタンです。セットで使うと、なにを入力する欄なのかが伝わるフォームになります。</p>",
         "<pre><span class='t'>&lt;label&gt;</span>お名前<span class='t'>&lt;/label&gt;</span>\n<span class='t'>&lt;input</span> <span class='a'>type</span>=<span class='a'>\"text\"</span> <span class='a'>placeholder</span>=<span class='a'>\"山田太郎\"</span><span class='t'>&gt;</span>\n<span class='t'>&lt;button&gt;</span>送信する<span class='t'>&lt;/button&gt;</span></pre>",
-        "<div class='note'>💡 <code>type=\"color\"</code> や <code>type=\"date\"</code> にすると、色や日付を選ぶ部品に変身します。プレビューで押して試してみて！（このラボでは送信先がないので、ボタンを押しても送信はされません）</div>"
+        "<div class='note'>💡 <code>type=\"color\"</code> や <code>type=\"date\"</code> にすると、色や日付を選ぶ部品に変身します。プレビューで押して試してみて！（Step 7では、このボタンをJavaScriptで本当に動かします）</div>"
       ].join(""),
       goal: "「アンケートページ」を作って、入力欄・名前ふだ・ボタンを置いてみましょう。",
       checks: [
@@ -623,7 +696,7 @@
           } }
       ],
       hint: "<h2>参加アンケート</h2>\n<label>お名前</label>\n<input type=\"text\" placeholder=\"山田太郎\">\n<label>好きな色</label>\n<input type=\"color\">\n<button>送信する</button>",
-      starter: { h: "<h1>アンケート</h1>\n<!-- 入力欄とボタンを作ってみよう -->\n\n", c: DEFAULT_CSS }
+      starter: { h: "<h1>アンケート</h1>\n<!-- 入力欄とボタンを作ってみよう -->\n\n", c: DEFAULT_CSS, j: DEFAULT_JS }
     },
     {
       id: 5,
@@ -650,7 +723,8 @@
       hint: "body {\n  background: #FFF6EC;\n}\nh1 {\n  color: #D6491F;\n  font-size: 40px;\n}",
       starter: {
         h: "<h1>カフェ・ラボ</h1>\n<p>あたらしい風味の実験室。</p>\n<p>本日のおすすめ：橙のタルト</p>\n",
-        c: "/* ここにCSSを書いてみよう。まずは h1 の色から！ */\n\n"
+        c: "/* ここにCSSを書いてみよう。まずは h1 の色から！ */\n\n",
+        j: DEFAULT_JS
       }
     },
     {
@@ -677,10 +751,175 @@
       hint: ".card {\n  background: #FFF6EC;\n  padding: 24px;\n  border: 2px solid #D6491F;\n  border-radius: 12px;\n}",
       starter: {
         h: "<div class=\"card\">\n  <h2>会員カード</h2>\n  <p>HTMLラボ 研究員：あなたの名前</p>\n</div>\n",
-        c: ".card {\n  background: #FFF6EC;\n  /* ここに padding / border / border-radius を足そう */\n}\n"
+        c: ".card {\n  background: #FFF6EC;\n  /* ここに padding / border / border-radius を足そう */\n}\n",
+        j: DEFAULT_JS
+      }
+    },
+    {
+      id: 7,
+      label: "ボタンと命令",
+      eyebrow: "Step 7 / JavaScript Basics",
+      title: "ボタンと命令 — JavaScriptで動きをつける",
+      tab: "j",
+      lesson: [
+        "<p>HTMLが「構造」、CSSが「見た目」なら、JavaScriptは「<strong>動き</strong>」の言語です。エディタの <strong>script.js</strong> タブに書きます。まずは、ページの中から部品を探す命令から。</p>",
+        "<pre><span class='a'>var</span> btn = document.<span class='t'>querySelector</span>(<span class='a'>\"button\"</span>);</pre>",
+        "<p>見つけた部品には <code>addEventListener</code> で「クリックされたら、これをやって」と予約できます。<code>style.background</code> に色を入れると、その場で見た目が変わります。</p>",
+        "<pre><span class='a'>var</span> btn = document.<span class='t'>querySelector</span>(<span class='a'>\"button\"</span>);\nbtn.<span class='t'>addEventListener</span>(<span class='a'>\"click\"</span>, <span class='a'>function</span> () {\n  document.body.style.background = <span class='a'>\"gold\"</span>;\n});</pre>",
+        "<div class='note'>💡 プレビューの中のボタンは実際に押せます。課題の判定も、ロボットが自動でボタンを押して「本当に色が変わるか」を確かめます 🤖</div>"
+      ].join(""),
+      goal: "ボタンを押すと、ページの背景色が変わる「マジックボタン」を作りましょう。",
+      checks: [
+        { html: "<b>&lt;button&gt;</b> をページに置く（HTMLタブ）",
+          test: function (d) {
+            var el = d.querySelector("button");
+            return !!el && el.textContent.trim().length > 0;
+          } },
+        { html: "<b>addEventListener</b> で「クリックされたら」を予約する（script.jsタブ）",
+          test: function (d, h, c, j) { return /addEventListener|\.onclick|onclick\s*=/i.test(j + " " + h); } },
+        { html: "ボタンを押すと背景の色が変わる 🤖自動クリックで判定",
+          judge: "var b=document.querySelector('button');if(!b)return false;var before=getComputedStyle(document.body).backgroundColor;b.click();var after=getComputedStyle(document.body).backgroundColor;return before!==after;" }
+      ],
+      hint: "var btn = document.querySelector(\"button\");\nbtn.addEventListener(\"click\", function () {\n  document.body.style.background = \"gold\";\n});",
+      starter: {
+        h: "<h1>マジックボタン</h1>\n<p>下のボタンを押すと、なにかが起こる……？</p>\n<button>押してみて</button>\n",
+        c: DEFAULT_CSS,
+        j: "// ここにJavaScriptを書いてみよう\n\n"
+      }
+    },
+    {
+      id: 8,
+      label: "入力とあいさつ",
+      eyebrow: "Step 8 / Inputs & Output",
+      title: "入力とあいさつ — 値をうけとって表示する",
+      tab: "j",
+      lesson: [
+        "<p>入力欄に書かれた文字は、<code>.value</code> で読み取れます。そして、要素の <code>textContent</code> に文字を入れると、画面に表示されます。「読む」と「書く」がそろうと、ページはあなたと会話を始めます。</p>",
+        "<pre><span class='a'>var</span> name = input.value;          <span class='c'>// 読む</span>\nmessage.textContent = <span class='a'>\"やあ！\"</span>;  <span class='c'>// 書く</span></pre>",
+        "<p>文字と文字は <code>+</code> でつなげられます（連結）。入力された名前を使って、あいさつ文を組み立ててみましょう。</p>",
+        "<pre><span class='a'>var</span> input = document.<span class='t'>querySelector</span>(<span class='a'>\"input\"</span>);\n<span class='a'>var</span> button = document.<span class='t'>querySelector</span>(<span class='a'>\"button\"</span>);\nbutton.<span class='t'>addEventListener</span>(<span class='a'>\"click\"</span>, <span class='a'>function</span> () {\n  <span class='a'>var</span> name = input.value;\n  document.<span class='t'>getElementById</span>(<span class='a'>\"message\"</span>).textContent =\n    <span class='a'>\"こんにちは、\"</span> + name + <span class='a'>\"さん！\"</span>;\n});</pre>",
+        "<div class='note'>💡 HTMLタブに、表示先の <code>&lt;p id=\"message\"&gt;</code> を用意してあります。<code>document.getElementById(\"message\")</code> で選べます。</div>"
+      ].join(""),
+      goal: "名前を入力してボタンを押すと、あいさつが表示される「あいさつマシン」を完成させましょう。",
+      checks: [
+        { html: "入力欄の文字を <b>.value</b> で読み取る（script.jsタブ）",
+          test: function (d, h, c, j) { return /\.value/.test(j); } },
+        { html: "<b>textContent</b>（または innerHTML）で結果を表示する",
+          test: function (d, h, c, j) { return /textContent|innerHTML/.test(j); } },
+        { html: "名前を入れてボタンを押すと、あいさつが出る 🤖自動入力で判定",
+          judge: "var i=document.querySelector('input');var b=document.querySelector('button');if(!i||!b)return false;i.value='テスト';b.click();return (document.body.textContent||'').indexOf('テスト')!==-1;" }
+      ],
+      hint: "var input = document.querySelector(\"input\");\nvar button = document.querySelector(\"button\");\nbutton.addEventListener(\"click\", function () {\n  var name = input.value;\n  document.getElementById(\"message\").textContent = \"こんにちは、\" + name + \"さん！\";\n});",
+      starter: {
+        h: "<h1>あいさつマシン</h1>\n<label>お名前</label>\n<input type=\"text\" placeholder=\"山田太郎\">\n<button>あいさつする</button>\n<p id=\"message\"></p>\n",
+        c: DEFAULT_CSS,
+        j: "// 入力された名前を使って、あいさつを表示しよう\n\n"
       }
     }
   ];
+
+  /* ── チャレンジ定義（見本を再現せよ） ──── */
+  var CHALLENGES = [
+    {
+      id: "ch1",
+      label: "プロフィール",
+      eyebrow: "Challenge 1 / Review of Step 1-2",
+      title: "チャレンジ①：プロフィールページを再現せよ",
+      desc: "Step 1〜2の総復習。下の見本とそっくりになるよう、ヒントなしでゼロからコードを書いてみましょう。文章は多少ちがってもOK、構造が合っていればクリアです。",
+      goal: "見本のプロフィールページを再現しましょう。タイムも記録されます！",
+      target: {
+        h: "<h1>佐藤ひかり</h1>\n<p>植物とコーヒーが好きです。ベランダで小さな庭を育てています。</p>\n<img src=\"flower.jpg\" alt=\"ベランダの花\">\n<p><a href=\"https://example.com\">わたしのブログ</a></p>",
+        c: ""
+      },
+      checks: [
+        { html: "<b>&lt;h1&gt;</b> の大見出しがある",
+          test: function (d) { var el = d.querySelector("h1"); return !!el && el.textContent.trim().length > 0; } },
+        { html: "<b>&lt;p&gt;</b> の段落が2つ以上ある",
+          test: function (d) {
+            var n = 0, ps = d.querySelectorAll("p");
+            for (var i = 0; i < ps.length; i++) if (ps[i].textContent.trim()) n++;
+            return n >= 2;
+          } },
+        { html: "<b>&lt;img&gt;</b> がある（src と alt つき）",
+          test: function (d) {
+            var im = d.querySelectorAll("img");
+            for (var i = 0; i < im.length; i++) {
+              if ((im[i].getAttribute("src") || "").trim() && (im[i].getAttribute("alt") || "").trim()) return true;
+            }
+            return false;
+          } },
+        { html: "<b>&lt;a&gt;</b> のリンクがある（href つき）",
+          test: function (d) {
+            var as = d.querySelectorAll("a");
+            for (var i = 0; i < as.length; i++) {
+              if ((as[i].getAttribute("href") || "").trim() && as[i].textContent.trim()) return true;
+            }
+            return false;
+          } }
+      ],
+      starter: { h: "<!-- 見本とそっくりのページを、なにも見ずに書いてみよう -->\n\n", c: DEFAULT_CSS, j: DEFAULT_JS }
+    },
+    {
+      id: "ch2",
+      label: "メニュー表",
+      eyebrow: "Challenge 2 / Review of Step 3",
+      title: "チャレンジ②：カフェのメニュー表を再現せよ",
+      desc: "Step 3の総復習。メニューの表とお知らせのリストを再現しましょう。「行の中にセルを入れる」入れ子構造を思い出して！",
+      goal: "見本のメニューページを再現しましょう。表の構造がポイントです。",
+      target: {
+        h: "<h1>カフェ・ラボ</h1>\n<h2>本日のメニュー</h2>\n<table>\n  <tr><th>品名</th><th>値段</th></tr>\n  <tr><td>ブレンド</td><td>450円</td></tr>\n  <tr><td>橙のタルト</td><td>520円</td></tr>\n</table>\n<h2>お知らせ</h2>\n<ul>\n  <li>水曜定休</li>\n  <li>テイクアウトできます</li>\n</ul>",
+        c: ""
+      },
+      checks: [
+        { html: "<b>&lt;h1&gt;</b> と、<b>&lt;h2&gt;</b> が2つ以上ある",
+          test: function (d) { return !!d.querySelector("h1") && d.querySelectorAll("h2").length >= 2; } },
+        { html: "<b>&lt;table&gt;</b> に行 <b>&lt;tr&gt;</b> が3つ以上ある",
+          test: function (d) { return d.querySelectorAll("table tr").length >= 3; } },
+        { html: "見出しセル <b>&lt;th&gt;</b> が2つ以上ある",
+          test: function (d) { return d.querySelectorAll("table th").length >= 2; } },
+        { html: "<b>&lt;ul&gt;</b> に <b>&lt;li&gt;</b> が2つ以上ある",
+          test: function (d) {
+            var n = 0, lis = d.querySelectorAll("ul li");
+            for (var i = 0; i < lis.length; i++) if (lis[i].textContent.trim()) n++;
+            return n >= 2;
+          } }
+      ],
+      starter: { h: "<!-- 見本のメニュー表を再現しよう -->\n\n", c: DEFAULT_CSS, j: DEFAULT_JS }
+    },
+    {
+      id: "ch3",
+      label: "カードのCSS",
+      eyebrow: "Challenge 3 / Review of Step 5-6",
+      title: "チャレンジ③：スタイルつきカードを再現せよ",
+      desc: "Step 5〜6の総復習。HTMLは用意ずみです。style.cssタブだけを使って、見本と同じカードに仕上げましょう。",
+      goal: "style.cssタブだけで、見本のカードの見た目を再現しましょう。",
+      tab: "c",
+      target: {
+        h: "<div class=\"card\">\n  <h2>ラボ会員証</h2>\n  <p>No.001 佐藤ひかり</p>\n</div>",
+        c: ".card {\n  background: #FFF6EC;\n  padding: 24px;\n  border: 2px solid #D6491F;\n  border-radius: 12px;\n}\nh2 {\n  color: #D6491F;\n}"
+      },
+      checks: [
+        { html: "<b>.card</b> セレクタでスタイルをあてる",
+          test: function (d, h, c) { return /\.card[^{}]*\{/.test(c); } },
+        { html: "<b>padding</b> で内側に余白をつける",
+          test: function (d, h, c) { return /(?:^|[;{\s])padding[^:;{}]*:/i.test(c); } },
+        { html: "<b>border</b> と <b>border-radius</b> でふちを丸くする",
+          test: function (d, h, c) { return /(?:^|[;{\s])border\s*:/i.test(c) && /border-radius\s*:/i.test(c); } },
+        { html: "<b>h2</b> に <b>color</b> で色をつける",
+          test: function (d, h, c) { return /h2[^{}]*\{[^}]*color\s*:/i.test(c); } }
+      ],
+      starter: {
+        h: "<div class=\"card\">\n  <h2>ラボ会員証</h2>\n  <p>No.001 佐藤ひかり</p>\n</div>\n",
+        c: "/* 見本と同じ見た目になるように書こう */\n\n",
+        j: DEFAULT_JS
+      }
+    }
+  ];
+  CHALLENGES.forEach(function (ch) {
+    ch.answerText = ch.id === "ch3"
+      ? "/* style.css */\n" + ch.target.c
+      : ch.target.h;
+  });
 
   var SANDBOX = {
     id: "free",
@@ -688,38 +927,41 @@
     eyebrow: "Free Mode / Sandbox",
     title: "自由制作モード — 学んだことで作品づくり",
     lesson: [
-      "<p>ここには課題がありません。見出し、リンク、画像、リスト、表、フォーム、CSS……学んだ道具をぜんぶ使って、好きなページを作ってください。</p>",
-      "<p>できあがったら下の「共有リンクをコピー」を押しましょう。作品がURLの中に埋め込まれるので、リンクを送るだけで相手のブラウザにあなたの作品が開きます。</p>",
-      "<div class='note'>💡 なにを作るか迷ったら：「架空のお店の紹介ページ」「推しの紹介」「今週の時間割（表で！）」など。</div>"
+      "<p>ここには課題がありません。見出し、リンク、画像、表、フォーム、CSS、JavaScript……学んだ道具をぜんぶ使って、好きなページを作ってください。作品は下の<strong>作品棚</strong>にいくつでも保存できます。</p>",
+      "<p>できあがったら「共有リンクをコピー」で友だちに送るか、「HTMLをダウンロード」で自分のパソコンに保存しましょう。ダウンロードしたファイルは、ダブルクリックすればブラウザで開く<strong>本物のWebページ</strong>です。</p>",
+      "<div class='note'>💡 なにを作るか迷ったら：「架空のお店の紹介ページ」「推しの紹介」「今週の時間割（表で！）」「押すとあいさつするページ（JSで！）」など。</div>"
     ].join(""),
     starter: {
       h: "<h1>じゆうけんきゅう</h1>\n<p>ここは自由制作スペース。学んだタグで作品を作ろう！</p>\n\n",
-      c: "/* CSSも自由に使えます */\nh1 {\n  color: #D6491F;\n}\n"
+      c: "/* CSSも自由に使えます */\nh1 {\n  color: #D6491F;\n}\n",
+      j: "// JavaScriptも自由に使えます\n\n"
     }
   };
 
   var BADGES = [
     { n: 1, emoji: "🌱", name: "はじめの一歩" },
-    { n: 3, emoji: "🔧", name: "タグ職人" },
-    { n: 6, emoji: "🏆", name: "ラボ・マスター" }
+    { n: 4, emoji: "🔧", name: "タグ職人" },
+    { n: 8, emoji: "🏆", name: "ラボ・マスター" },
+    { n: "ch", emoji: "⚡", name: "チャレンジャー" }
   ];
 
   /* ── 状態と保存 ───────────────────────── */
   var KEY = "htmllab-v2";
-  var state = { current: 1, cleared: {}, code: {}, badges: [] };
+  var state = { current: 1, cleared: {}, code: {}, badges: [], chCleared: {}, times: {}, works: null, workId: null };
   try {
     var saved = JSON.parse(localStorage.getItem(KEY) || "null");
     if (saved && saved.code) {
+      saved.badges = saved.badges || [];
+      saved.chCleared = saved.chCleared || {};
+      saved.times = saved.times || {};
       state = saved;
-      if (!state.badges) state.badges = [];
     } else {
-      // 旧バージョン（v1: コードがHTML文字列のみ）からの引き継ぎ
       var v1 = JSON.parse(localStorage.getItem("htmllab-v1") || "null");
       if (v1 && v1.code) {
         state.current = v1.current || 1;
         state.cleared = v1.cleared || {};
         for (var k in v1.code) {
-          if (typeof v1.code[k] === "string") state.code[k] = { h: v1.code[k], c: DEFAULT_CSS };
+          if (typeof v1.code[k] === "string") state.code[k] = { h: v1.code[k], c: DEFAULT_CSS, j: DEFAULT_JS };
         }
       }
     }
@@ -730,34 +972,70 @@
 
   /* ── 要素 ─────────────────────────────── */
   var $ = function (id) { return document.getElementById(id); };
-  var editor = $("editor"), preview = $("preview");
+  var editor = $("editor"), preview = $("preview"), judgeFrame = $("judge");
   var stepNav = $("stepNav"), lessonCard = $("lessonCard");
   var taskTitle = $("taskTitle"), taskSub = $("taskSub"), taskGoal = $("taskGoal");
   var checkList = $("checkList"), adviceBox = $("adviceBox"), adviceList = $("adviceList");
-  var hintBox = $("hintBox"), hintCode = $("hintCode");
+  var hintBox = $("hintBox"), hintSummary = $("hintSummary"), hintCode = $("hintCode");
   var clearBanner = $("clearBanner"), clearMsg = $("clearMsg");
   var nextBtn = $("nextBtn"), resetBtn = $("resetBtn");
   var shareRow = $("shareRow"), shareBtn = $("shareBtn");
-  var tabHtml = $("tabHtml"), tabCss = $("tabCss");
+  var tabHtml = $("tabHtml"), tabCss = $("tabCss"), tabJs = $("tabJs");
   var progressText = $("progressText"), progressBar = $("progressBar");
   var badgeRow = $("badgeRow"), toast = $("toast");
+  var worksCard = $("worksCard"), worksGrid = $("worksGrid"), worksCount = $("worksCount");
+  var workName = $("workName"), newWorkBtn = $("newWorkBtn"), dupWorkBtn = $("dupWorkBtn");
+  var dlWorkBtn = $("dlWorkBtn"), delWorkBtn = $("delWorkBtn");
 
-  var currentTab = "h"; // 'h' = index.html / 'c' = style.css
+  var currentTab = "h"; // 'h' index.html / 'c' style.css / 'j' script.js
 
   function isFree() { return state.current === "free"; }
+  function isCh() { return String(state.current).indexOf("ch") === 0; }
+  function chIndex(id) {
+    for (var i = 0; i < CHALLENGES.length; i++) if (CHALLENGES[i].id === id) return i;
+    return -1;
+  }
   function currentStep() {
     if (isFree()) return SANDBOX;
+    if (isCh()) return CHALLENGES[Math.max(0, chIndex(state.current))];
     for (var i = 0; i < STEPS.length; i++) if (STEPS[i].id === state.current) return STEPS[i];
     return STEPS[0];
   }
+
+  /* ── 作品棚 ───────────────────────────── */
+  function uid() { return "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function ensureWorks() {
+    if (!state.works || !state.works.length) {
+      state.works = [];
+      var legacy = state.code && state.code.free;
+      state.works.push({
+        id: uid(),
+        name: legacy ? "はじめての作品" : "さくひん1",
+        h: legacy ? legacy.h : SANDBOX.starter.h,
+        c: legacy ? legacy.c : SANDBOX.starter.c,
+        j: (legacy && legacy.j) || SANDBOX.starter.j
+      });
+      if (state.code) delete state.code.free;
+    }
+    if (!state.workId || !getWork(state.workId)) state.workId = state.works[0].id;
+  }
+  function getWork(id) {
+    for (var i = 0; i < state.works.length; i++) if (state.works[i].id === id) return state.works[i];
+    return null;
+  }
+  function currentWork() { ensureWorks(); return getWork(state.workId); }
+
   function buf() {
+    if (isFree()) return currentWork();
     var id = state.current, step = currentStep();
-    if (!state.code[id]) state.code[id] = { h: step.starter.h, c: step.starter.c };
+    if (!state.code[id]) state.code[id] = { h: step.starter.h, c: step.starter.c, j: step.starter.j || DEFAULT_JS };
+    if (state.code[id].j == null) state.code[id].j = DEFAULT_JS;
     return state.code[id];
   }
 
   /* ── プレビュー ───────────────────────── */
-  function buildPreviewDoc(html, css) {
+  function escCode(s) { return String(s || "").replace(/<\//g, "<\\/"); }
+  function buildPreviewDoc(html, css, js, extraScript) {
     var fallback =
       "document.addEventListener('error',function(e){" +
       "var t=e.target;" +
@@ -776,14 +1054,26 @@
       "img{max-width:100%}a{color:#C2410C}" +
       "table{border-collapse:collapse}td,th{border:1px solid #D8D2C6;padding:6px 12px}" +
       "input,button{font:inherit;padding:6px 10px}" +
-      "</style><style>" + css + "</style></head><body>" + html +
-      "<scr" + "ipt>" + fallback + "</scr" + "ipt></body></html>";
+      "</style><style>" + escCode(css) + "</style></head><body>" + html +
+      "<scr" + "ipt>" + fallback + "</scr" + "ipt>" +
+      "<scr" + "ipt>" + escCode(js) + "</scr" + "ipt>" +
+      (extraScript ? "<scr" + "ipt>" + extraScript + "</scr" + "ipt>" : "") +
+      "</body></html>";
+  }
+
+  /* ── 動作テスト（判定用の隠しiframe） ──── */
+  function harness(tests, token) {
+    var body = tests.map(function (t) {
+      return "try{r.push(!!(function(){" + t + "})());}catch(e){r.push(false);}";
+    }).join("");
+    return "window.addEventListener('load',function(){setTimeout(function(){var r=[];" + body +
+      "parent.postMessage({type:'htmllab-judge',token:" + token + ",results:r},'*');},80);});";
   }
 
   /* ── つまずき診断 ─────────────────────── */
   var PAIRED = ["h1","h2","h3","h4","h5","h6","p","a","ul","ol","li","table","tr","td","th",
                 "strong","em","div","span","form","label","button","header","footer","nav","main","section"];
-  function diagnose(html, css, doc) {
+  function diagnose(html, css, js, doc) {
     var msgs = [];
     var src = html.replace(/<!--[\s\S]*?-->/g, ""); // コメント内の例は対象外
 
@@ -793,7 +1083,7 @@
     if (/<image[\s>]/i.test(src)) {
       msgs.push("<image> というタグはありません。画像のタグは <img> です。");
     }
-    for (var i = 0; i < PAIRED.length; i++) {
+    for (var i = 0; i < PAIRED.length && msgs.length < 3; i++) {
       var t = PAIRED[i];
       var open = (src.match(new RegExp("<" + t + "(?=[\\s/>])", "gi")) || []).length;
       var close = (src.match(new RegExp("</" + t + "\\s*>", "gi")) || []).length;
@@ -802,31 +1092,47 @@
       } else if (close > open) {
         msgs.push("</" + t + "> が多いようです。開始タグ <" + t + "> とセットになっているか確認しましょう。");
       }
-      if (msgs.length >= 3) return msgs.slice(0, 3);
     }
     if (/<[a-z][^>]*\s(?:href|src|alt|type|class|id|placeholder)\s*=\s*[^"'\s>][^\s>]*/i.test(src)) {
       msgs.push("属性の値は引用符で囲みましょう（例：href=\"https://example.com\"）。");
     }
     var imgs = doc.querySelectorAll("img");
-    for (var j = 0; j < imgs.length; j++) {
-      if (imgs[j].getAttribute("src") && imgs[j].getAttribute("alt") === null) {
+    for (var m = 0; m < imgs.length; m++) {
+      if (imgs[m].getAttribute("src") && imgs[m].getAttribute("alt") === null) {
         msgs.push("<img> には alt=\"説明\" をつけると、画像が見られない人にも内容が伝わります。");
         break;
       }
     }
-    // CSS側のチェック
+    // CSS側
     var cssSrc = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    var ob = (cssSrc.match(/\{/g) || []).length, cb = (cssSrc.match(/\}/g) || []).length;
-    if (ob !== cb) {
+    if ((cssSrc.match(/\{/g) || []).length !== (cssSrc.match(/\}/g) || []).length) {
       msgs.push("style.css の { と } の数が合いません。閉じカッコを確認しましょう。");
     }
     if (/[＜＞：；”]/.test(cssSrc)) {
       msgs.push("style.css に全角の記号が入っています。: や ; は半角で書きましょう。");
     }
+    // JS側（文字列とコメントをざっくり除いてから数える）
+    var jsSrc = js
+      .replace(/(["'`])(?:\\.|(?!\1)[\s\S])*?\1/g, "\"\"")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/[^\n]*/g, "");
+    if ((jsSrc.match(/\(/g) || []).length !== (jsSrc.match(/\)/g) || []).length) {
+      msgs.push("script.js の ( と ) の数が合いません。閉じカッコを確認しましょう。");
+    }
+    if ((jsSrc.match(/\{/g) || []).length !== (jsSrc.match(/\}/g) || []).length) {
+      msgs.push("script.js の { と } の数が合いません。閉じカッコを確認しましょう。");
+    }
+    if (/[（）｛｝：；“”]/.test(jsSrc)) {
+      msgs.push("script.js に全角の記号が入っています。( ) や ; は半角で書きましょう。");
+    }
     return msgs.slice(0, 3);
   }
 
   /* ── 描画 ─────────────────────────────── */
+  function chAllCleared() {
+    return CHALLENGES.every(function (c) { return state.chCleared[c.id]; });
+  }
+
   function renderNav() {
     stepNav.innerHTML = "";
     STEPS.forEach(function (s) {
@@ -840,6 +1146,13 @@
       b.addEventListener("click", function () { openStep(s.id); });
       stepNav.appendChild(b);
     });
+    var chBtn = document.createElement("button");
+    chBtn.type = "button";
+    chBtn.className = "step-pill mode" + (isCh() ? " active" : "") + (chAllCleared() ? " done" : "");
+    chBtn.innerHTML = "<span class='num'>" + (chAllCleared() ? "✓" : "⚡") + "</span>チャレンジ";
+    chBtn.addEventListener("click", function () { if (!isCh()) openStep("ch1"); });
+    stepNav.appendChild(chBtn);
+
     var freeBtn = document.createElement("button");
     freeBtn.type = "button";
     freeBtn.className = "step-pill free" + (isFree() ? " active" : "");
@@ -860,23 +1173,24 @@
     progressBar.style.width = (done / STEPS.length * 100) + "%";
   }
 
+  function badgeEarned(b) {
+    return b.n === "ch" ? chAllCleared() : clearedCount() >= b.n;
+  }
   function renderBadges() {
-    var done = clearedCount();
     badgeRow.innerHTML = "";
     BADGES.forEach(function (b) {
       var el = document.createElement("span");
-      var earned = done >= b.n;
+      var earned = badgeEarned(b);
       el.className = "badge " + (earned ? "earned" : "locked");
       el.textContent = b.emoji;
-      el.title = b.name + (earned ? "（獲得済み）" : "（" + b.n + "ステップクリアで獲得）");
+      el.title = b.name + (earned ? "（獲得済み）"
+        : b.n === "ch" ? "（チャレンジを3つクリアで獲得）" : "（" + b.n + "ステップクリアで獲得）");
       badgeRow.appendChild(el);
     });
   }
-
   function checkBadges() {
-    var done = clearedCount();
     BADGES.forEach(function (b) {
-      if (done >= b.n && state.badges.indexOf(b.n) === -1) {
+      if (badgeEarned(b) && state.badges.indexOf(b.n) === -1) {
         state.badges.push(b.n);
         showToast("🏅 バッジ獲得：" + b.name + " " + b.emoji);
       }
@@ -913,47 +1227,117 @@
     });
   }
 
+  /* ── タイマー（チャレンジ用） ──────────── */
+  var chStart = 0, chTick = null;
+  function fmtTime(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function startTimer() {
+    chStart = Date.now();
+    stopTimer();
+    chTick = setInterval(updateTimerLabel, 1000);
+  }
+  function stopTimer() { clearInterval(chTick); chTick = null; }
+  function updateTimerLabel() {
+    if (!isCh()) return;
+    var ch = currentStep();
+    var best = state.times[ch.id];
+    taskSub.textContent = state.chCleared[ch.id]
+      ? "クリア済み" + (best ? "　ベスト " + fmtTime(best) : "")
+      : "⏱ " + fmtTime(Math.max(0, Math.round((Date.now() - chStart) / 1000))) +
+        (best ? "　ベスト " + fmtTime(best) : "");
+  }
+
   /* ── 判定 ─────────────────────────────── */
   var parser = new DOMParser();
+  var judgeSeq = 0, judgeCtx = null;
+
   function evaluate() {
     var step = currentStep();
     var b = buf();
     var doc = parser.parseFromString(b.h, "text/html");
-    renderAdvice(diagnose(b.h, b.c, doc));
+    renderAdvice(diagnose(b.h, b.c, b.j || "", doc));
 
     if (isFree()) {
       clearBanner.classList.remove("show");
       return;
     }
-
-    var results = step.checks.map(function (c) {
-      try { return !!c.test(doc, b.h, b.c); } catch (e) { return false; }
+    var results = [], judgeTests = [], judgeIdx = [];
+    step.checks.forEach(function (c, i) {
+      if (c.judge) {
+        results[i] = false;
+        judgeTests.push(c.judge);
+        judgeIdx.push(i);
+      } else {
+        try { results[i] = !!c.test(doc, b.h, b.c, b.j || ""); } catch (e) { results[i] = false; }
+      }
     });
-    renderChecks(results);
+    if (judgeTests.length) {
+      judgeSeq++;
+      judgeCtx = { token: judgeSeq, results: results, idx: judgeIdx, key: state.current };
+      judgeFrame.srcdoc = buildPreviewDoc(b.h, b.c, b.j || "", harness(judgeTests, judgeSeq));
+      renderChecks(results); // 動作テストの結果が届くまでの暫定表示
+    } else {
+      finish(results);
+    }
+  }
 
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (!d || d.type !== "htmllab-judge" || !judgeCtx || d.token !== judgeCtx.token) return;
+    if (judgeCtx.key !== state.current) return;
+    var res = judgeCtx.results.slice();
+    judgeCtx.idx.forEach(function (ci, k) { res[ci] = !!d.results[k]; });
+    finish(res);
+  });
+
+  function finish(results) {
+    renderChecks(results);
     var all = results.length > 0 && results.every(function (r) { return r; });
-    if (all && !state.cleared[step.id]) {
-      state.cleared[step.id] = true;
-      save();
-      renderNav();
-      renderProgress();
-      celebrate();
-      checkBadges();
+    var step = currentStep();
+    if (isCh()) {
+      if (all && !state.chCleared[step.id]) {
+        state.chCleared[step.id] = true;
+        var secs = Math.max(1, Math.round((Date.now() - chStart) / 1000));
+        if (!state.times[step.id] || secs < state.times[step.id]) state.times[step.id] = secs;
+        stopTimer();
+        updateTimerLabel();
+        save();
+        renderNav();
+        celebrate();
+        checkBadges();
+        showToast("⚡ 再現成功！タイム " + fmtTime(secs));
+      }
+    } else {
+      if (all && !state.cleared[step.id]) {
+        state.cleared[step.id] = true;
+        save();
+        renderNav();
+        renderProgress();
+        celebrate();
+        checkBadges();
+      }
     }
     updateBanner(all);
   }
 
   function updateBanner(allPass) {
+    if (isFree()) { clearBanner.classList.remove("show"); return; }
     var step = currentStep();
-    var show = !isFree() && (allPass || state.cleared[step.id]);
+    var cleared = isCh() ? state.chCleared[step.id] : state.cleared[step.id];
+    var show = allPass || cleared;
     clearBanner.classList.toggle("show", !!show);
     if (!show) return;
-    var isLast = step.id === STEPS[STEPS.length - 1].id;
-    var allDone = STEPS.every(function (s) { return state.cleared[s.id]; });
-    clearMsg.textContent = (isLast && allDone)
-      ? "全ステップクリア！おつかれさまでした 🎉"
-      : "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
-    nextBtn.textContent = isLast ? "自由制作モードへ 🎨" : "次のステップへ →";
+    if (isCh()) {
+      var best = state.times[step.id];
+      clearMsg.textContent = "再現成功！" + (best ? "ベストタイム " + fmtTime(best) + " " : "") + "🎉";
+      nextBtn.textContent = chIndex(step.id) < CHALLENGES.length - 1 ? "次のチャレンジへ ⚡" : "自由制作モードへ 🎨";
+    } else {
+      var isLast = step.id === STEPS[STEPS.length - 1].id;
+      var allDone = STEPS.every(function (s) { return state.cleared[s.id]; });
+      clearMsg.textContent = (isLast && allDone)
+        ? "全ステップクリア！おつかれさまでした 🎉"
+        : "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
+      nextBtn.textContent = isLast ? "チャレンジモードへ ⚡" : "次のステップへ →";
+    }
   }
 
   /* ── 紙吹雪 ───────────────────────────── */
@@ -980,8 +1364,8 @@
   function decodeShare(s) { return JSON.parse(decodeURIComponent(escape(atob(s)))); }
 
   shareBtn.addEventListener("click", function () {
-    var b = buf();
-    var hash = "#share=" + encodeShare({ h: b.h, c: b.c });
+    var w = currentWork();
+    var hash = "#share=" + encodeShare({ h: w.h, c: w.c, j: w.j, n: w.name });
     try { history.replaceState(null, "", hash); } catch (e) { location.hash = hash; }
     var url = location.href;
     function done() { showToast("🔗 共有リンクをコピーしました！そのまま送れます"); }
@@ -996,45 +1380,207 @@
     }
   });
 
+  /* ── 作品のダウンロード ─────────────────── */
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[ch];
+    });
+  }
+  dlWorkBtn.addEventListener("click", function () {
+    var w = currentWork();
+    var doc = "<!DOCTYPE html>\n<html lang=\"ja\">\n<head>\n<meta charset=\"UTF-8\">\n" +
+      "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+      "<title>" + escapeHtml(w.name) + "</title>\n<style>\n" + w.c + "\n</style>\n</head>\n<body>\n" +
+      w.h + "\n<scr" + "ipt>\n" + w.j + "\n</scr" + "ipt>\n</body>\n</html>\n";
+    var blob = new Blob([doc], { type: "text/html" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (w.name || "mypage") + ".html";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    showToast("💾 「" + w.name + ".html」を保存しました。ダブルクリックで開けます");
+  });
+
+  /* ── 作品棚の描画と操作 ─────────────────── */
+  function renderWorks() {
+    ensureWorks();
+    var cur = currentWork();
+    workName.value = cur.name;
+    worksCount.textContent = state.works.length + "作品（この端末に保存）";
+    worksGrid.innerHTML = "";
+    state.works.forEach(function (wk) {
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "work-card" + (wk.id === state.workId ? " active" : "");
+      card.title = wk.name + "を開く";
+      var thumb = document.createElement("div");
+      thumb.className = "work-thumb";
+      var fr = document.createElement("iframe");
+      fr.setAttribute("sandbox", "allow-scripts");
+      fr.setAttribute("tabindex", "-1");
+      fr.setAttribute("title", wk.name + "のプレビュー");
+      fr.srcdoc = buildPreviewDoc(wk.h, wk.c, wk.j, "");
+      thumb.appendChild(fr);
+      var meta = document.createElement("span");
+      meta.className = "work-meta";
+      meta.textContent = wk.name;
+      card.appendChild(thumb);
+      card.appendChild(meta);
+      card.addEventListener("click", function () {
+        if (state.workId !== wk.id) {
+          state.workId = wk.id;
+          save();
+          editor.value = buf()[currentTab];
+          renderWorks();
+          refresh(true);
+        }
+      });
+      worksGrid.appendChild(card);
+    });
+    disarmDelete();
+  }
+
+  workName.addEventListener("input", function () {
+    var w = currentWork();
+    w.name = workName.value;
+    save();
+    var span = worksGrid.querySelector(".work-card.active .work-meta");
+    if (span) span.textContent = w.name;
+  });
+
+  newWorkBtn.addEventListener("click", function () {
+    ensureWorks();
+    var w = { id: uid(), name: "さくひん" + (state.works.length + 1),
+      h: SANDBOX.starter.h, c: SANDBOX.starter.c, j: SANDBOX.starter.j };
+    state.works.push(w);
+    state.workId = w.id;
+    save();
+    editor.value = buf()[currentTab];
+    renderWorks();
+    refresh(true);
+  });
+
+  dupWorkBtn.addEventListener("click", function () {
+    var w = currentWork();
+    var copy = { id: uid(), name: w.name + "のコピー", h: w.h, c: w.c, j: w.j };
+    state.works.push(copy);
+    state.workId = copy.id;
+    save();
+    editor.value = buf()[currentTab];
+    renderWorks();
+    refresh(true);
+  });
+
+  var delTimer = null;
+  function disarmDelete() {
+    clearTimeout(delTimer);
+    delWorkBtn.classList.remove("armed");
+    delWorkBtn.textContent = "🗑 削除";
+  }
+  delWorkBtn.addEventListener("click", function () {
+    if (!delWorkBtn.classList.contains("armed")) {
+      delWorkBtn.classList.add("armed");
+      delWorkBtn.textContent = "ほんとうに削除する？";
+      clearTimeout(delTimer);
+      delTimer = setTimeout(disarmDelete, 3000);
+      return;
+    }
+    disarmDelete();
+    var id = state.workId;
+    state.works = state.works.filter(function (w) { return w.id !== id; });
+    ensureWorks();
+    save();
+    editor.value = buf()[currentTab];
+    renderWorks();
+    refresh(true);
+    showToast("🗑 作品を削除しました");
+  });
+
   /* ── エディタタブ ─────────────────────── */
   function setTab(tab) {
     currentTab = tab;
-    tabHtml.classList.toggle("active", tab === "h");
-    tabCss.classList.toggle("active", tab === "c");
-    tabHtml.setAttribute("aria-selected", tab === "h" ? "true" : "false");
-    tabCss.setAttribute("aria-selected", tab === "c" ? "true" : "false");
+    [["h", tabHtml], ["c", tabCss], ["j", tabJs]].forEach(function (pair) {
+      pair[1].classList.toggle("active", tab === pair[0]);
+      pair[1].setAttribute("aria-selected", tab === pair[0] ? "true" : "false");
+    });
     editor.value = buf()[tab];
   }
   tabHtml.addEventListener("click", function () { if (currentTab !== "h") setTab("h"); });
   tabCss.addEventListener("click", function () { if (currentTab !== "c") setTab("c"); });
+  tabJs.addEventListener("click", function () { if (currentTab !== "j") setTab("j"); });
 
   /* ── ステップ切り替え ─────────────────── */
+  function renderChallengeLesson(ch) {
+    lessonCard.innerHTML =
+      "<div class='eyebrow'>" + ch.eyebrow + "</div>" +
+      "<h2>" + ch.title + "</h2>" +
+      "<div class='ch-nav'></div>" +
+      "<p>" + ch.desc + "</p>" +
+      "<div class='target-frame'>" +
+      "<div class='target-head'>🎯 見本 — これとそっくりに作ろう</div>" +
+      "<iframe title='見本のプレビュー' sandbox='allow-scripts' tabindex='-1'></iframe>" +
+      "</div>";
+    var nav = lessonCard.querySelector(".ch-nav");
+    CHALLENGES.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "step-pill" +
+        (c.id === state.current ? " active" : "") +
+        (state.chCleared[c.id] ? " done" : "");
+      b.innerHTML = "<span class='num'>" + (state.chCleared[c.id] ? "✓" : (i + 1)) + "</span>" + c.label;
+      b.addEventListener("click", function () { if (c.id !== state.current) openStep(c.id); });
+      nav.appendChild(b);
+    });
+    lessonCard.querySelector(".target-frame iframe").srcdoc =
+      buildPreviewDoc(ch.target.h, ch.target.c || "", ch.target.j || "", "");
+  }
+
   function openStep(id) {
+    stopTimer();
     state.current = id;
     save();
     var step = currentStep();
-    lessonCard.innerHTML =
-      "<div class='eyebrow'>" + step.eyebrow + "</div>" +
-      "<h2>" + step.title + "</h2>" + step.lesson;
+    resetBtn.hidden = isFree();
+    worksCard.hidden = !isFree();
 
-    if (isFree()) {
+    if (isCh()) {
+      renderChallengeLesson(step);
+      taskTitle.textContent = "再現チェック";
+      taskGoal.textContent = step.goal;
+      shareRow.hidden = true;
+      hintBox.hidden = false;
+      hintSummary.textContent = "答えのコードを見る（最終手段！）";
+      hintCode.textContent = step.answerText;
+      hintBox.open = false;
+      if (!state.chCleared[step.id]) startTimer();
+      updateTimerLabel();
+    } else if (isFree()) {
+      ensureWorks();
+      lessonCard.innerHTML =
+        "<div class='eyebrow'>" + step.eyebrow + "</div><h2>" + step.title + "</h2>" + step.lesson;
       taskTitle.textContent = "つくる → 共有する";
       taskSub.textContent = "自由制作モード";
-      taskGoal.textContent = "作品ができたら、共有リンクで友だちに送ってみましょう。";
+      taskGoal.textContent = "作品はいくつでも作れます。できたら共有リンクか、HTMLダウンロードで手元に残しましょう。";
       checkList.innerHTML = "";
       shareRow.hidden = false;
       hintBox.hidden = true;
+      renderWorks();
     } else {
+      lessonCard.innerHTML =
+        "<div class='eyebrow'>" + step.eyebrow + "</div><h2>" + step.title + "</h2>" + step.lesson;
       taskTitle.textContent = "課題";
       taskSub.textContent = "コードを書くと自動で判定されます";
       taskGoal.textContent = step.goal;
       shareRow.hidden = true;
       hintBox.hidden = false;
+      hintSummary.textContent = "ヒントを見る（書き方の例）";
       hintCode.textContent = step.hint;
       hintBox.open = false;
     }
 
-    setTab(step.tab === "c" ? "c" : "h");
+    setTab(step.tab === "c" ? "c" : step.tab === "j" ? "j" : "h");
     renderNav();
     renderProgress();
     refresh(true);
@@ -1048,7 +1594,11 @@
       var b = buf();
       b[currentTab] = editor.value;
       save();
-      preview.srcdoc = buildPreviewDoc(b.h, b.c);
+      preview.srcdoc = buildPreviewDoc(b.h, b.c, b.j || "", "");
+      if (isFree()) {
+        var fr = worksGrid.querySelector(".work-card.active iframe");
+        if (fr) fr.srcdoc = preview.srcdoc;
+      }
       evaluate();
     }, immediate ? 0 : 180);
   }
@@ -1065,16 +1615,22 @@
   });
   resetBtn.addEventListener("click", function () {
     var step = currentStep();
-    state.code[state.current] = { h: step.starter.h, c: step.starter.c };
+    state.code[state.current] = { h: step.starter.h, c: step.starter.c, j: step.starter.j || DEFAULT_JS };
     editor.value = buf()[currentTab];
     refresh(true);
     editor.focus();
   });
   nextBtn.addEventListener("click", function () {
+    if (isCh()) {
+      var ci = chIndex(state.current);
+      if (ci < CHALLENGES.length - 1) openStep(CHALLENGES[ci + 1].id);
+      else openStep("free");
+      return;
+    }
     var idx = -1;
     STEPS.forEach(function (s, i) { if (s.id === state.current) idx = i; });
     if (idx >= 0 && idx < STEPS.length - 1) openStep(STEPS[idx + 1].id);
-    else openStep("free");
+    else openStep("ch1");
   });
 
   /* ── 起動 ─────────────────────────────── */
@@ -1083,15 +1639,24 @@
     try {
       var shared = decodeShare(location.hash.slice(7));
       if (shared && typeof shared.h === "string") {
-        state.code.free = { h: shared.h, c: typeof shared.c === "string" ? shared.c : "" };
+        ensureWorks();
+        var w = {
+          id: uid(),
+          name: (typeof shared.n === "string" && shared.n.trim()) ? shared.n : "共有された作品",
+          h: shared.h,
+          c: typeof shared.c === "string" ? shared.c : "",
+          j: typeof shared.j === "string" ? shared.j : ""
+        };
+        state.works.push(w);
+        state.workId = w.id;
         openStep("free");
-        showToast("🎁 共有された作品を開きました！自由に編集できます");
+        showToast("🎁 共有された作品を作品棚に追加しました！");
         opened = true;
       }
     } catch (e) { /* 壊れた共有リンクは無視して通常起動 */ }
   }
   if (!opened) {
-    var valid = state.current === "free" ||
+    var valid = state.current === "free" || chIndex(state.current) >= 0 ||
       STEPS.some(function (s) { return s.id === state.current; });
     openStep(valid ? state.current : 1);
   }
