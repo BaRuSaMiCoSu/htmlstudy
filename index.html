@@ -20,6 +20,7 @@
     --ok: #1F7A46;
     --ok-soft: #E3F2E8;
     --gold: #E8B93E;
+    --gold-soft: #FBF3DD;
     --ed-bg: #241F1B;
     --ed-head: #2E2823;
     --ed-ink: #F2E9DF;
@@ -40,6 +41,7 @@
       --ok: #4CC57E;
       --ok-soft: #223828;
       --gold: #E8B93E;
+      --gold-soft: #383021;
       --ed-bg: #171310;
       --ed-head: #221D19;
       --ed-ink: #F2E9DF;
@@ -50,14 +52,16 @@
   :root[data-theme="light"] {
     --bg: #F5F3EE; --panel: #FFFFFF; --panel-2: #FBFAF6; --ink: #2A241E;
     --muted: #6E655B; --line: #E5E0D6; --accent: #D6491F; --accent-ink: #B23A15;
-    --accent-soft: #FBE9E1; --ok: #1F7A46; --ok-soft: #E3F2E8; --gold: #E8B93E;
+    --accent-soft: #FBE9E1; --ok: #1F7A46; --ok-soft: #E3F2E8;
+    --gold: #E8B93E; --gold-soft: #FBF3DD;
     --ed-bg: #241F1B; --ed-head: #2E2823; --ed-ink: #F2E9DF; --ed-muted: #9C9083;
     --shadow: 0 1px 2px rgba(42,36,30,.05), 0 4px 16px rgba(42,36,30,.06);
   }
   :root[data-theme="dark"] {
     --bg: #1C1916; --panel: #262220; --panel-2: #2B2724; --ink: #F0EAE2;
     --muted: #A69C8F; --line: #3A342E; --accent: #FF7A45; --accent-ink: #FF8F62;
-    --accent-soft: #3B281E; --ok: #4CC57E; --ok-soft: #223828; --gold: #E8B93E;
+    --accent-soft: #3B281E; --ok: #4CC57E; --ok-soft: #223828;
+    --gold: #E8B93E; --gold-soft: #383021;
     --ed-bg: #171310; --ed-head: #221D19; --ed-ink: #F2E9DF; --ed-muted: #8A7F73;
     --shadow: 0 1px 2px rgba(0,0,0,.25), 0 4px 16px rgba(0,0,0,.25);
   }
@@ -101,6 +105,15 @@
   .logo-text strong { font-size: 15.5px; font-weight: 800; letter-spacing: .01em; }
   .logo-text span { display: block; font-size: 11px; color: var(--muted); }
   .topbar-spacer { flex: 1; }
+  .badges { display: flex; gap: 6px; }
+  .badge {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--panel-2); border: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .badge.locked { opacity: .35; filter: grayscale(1); }
+  .badge.earned { border-color: var(--gold); background: var(--gold-soft); }
   .progress-chip {
     display: flex; align-items: center; gap: 8px;
     font-size: 12.5px; font-weight: 700; color: var(--muted);
@@ -151,6 +164,8 @@
   }
   .step-pill.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
   .step-pill.done .num { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .step-pill.free { border-style: dashed; }
+  .step-pill.free .num { background: var(--gold-soft); border-color: var(--gold); font-size: 12px; }
   .step-pill:disabled { opacity: .5; cursor: not-allowed; }
 
   .card {
@@ -187,8 +202,8 @@
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 12.5px; line-height: 1.8; tab-size: 2;
   }
-  .lesson pre .t { color: #FF9E6B; }      /* tag */
-  .lesson pre .a { color: #E8C56B; }      /* attribute */
+  .lesson pre .t { color: #FF9E6B; }      /* tag / selector */
+  .lesson pre .a { color: #E8C56B; }      /* attribute / property */
   .lesson pre .c { color: #8A7F73; }      /* comment */
   .note {
     margin: 14px 0 0; padding: 10px 14px;
@@ -224,6 +239,19 @@
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-weight: 600; font-size: .95em;
   }
+
+  /* 診断アドバイス */
+  .advice {
+    margin-top: 14px; padding: 11px 14px;
+    background: var(--gold-soft); border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+  }
+  .advice-title { font-size: 12px; font-weight: 800; color: var(--ink); }
+  .advice ul {
+    margin: 6px 0 0; padding-left: 18px;
+    font-size: 12.5px; color: var(--muted); line-height: 1.8;
+  }
+
   .task details { margin-top: 14px; }
   .task summary {
     font-size: 12.5px; font-weight: 700; color: var(--muted);
@@ -237,6 +265,16 @@
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 12px; line-height: 1.8;
   }
+
+  /* 共有 */
+  .share-row { margin-top: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .btn-share {
+    border: none; border-radius: 8px;
+    background: var(--accent); color: #fff;
+    font-size: 13px; font-weight: 800; padding: 9px 16px;
+  }
+  .btn-share:hover { filter: brightness(1.08); }
+  .share-note { font-size: 11.5px; color: var(--muted); }
 
   .clear-banner {
     display: none;
@@ -274,14 +312,18 @@
     font-size: 12px; font-weight: 700;
   }
   .editor-panel { background: var(--ed-bg); border-color: transparent; }
-  .editor-panel .panel-head { background: var(--ed-head); color: var(--ed-muted); }
+  .editor-panel .panel-head { background: var(--ed-head); color: var(--ed-muted); padding-right: 10px; }
+  .file-tabs { display: flex; gap: 2px; align-self: flex-end; }
   .file-chip {
+    border: none; background: transparent;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 11.5px; color: var(--ed-ink);
-    background: var(--ed-bg); border-radius: 6px 6px 0 0;
-    padding: 10px 14px 9px; margin-bottom: -11px; align-self: flex-end;
-    border-bottom: 2px solid var(--accent);
+    font-size: 11.5px; color: var(--ed-muted);
+    padding: 10px 14px 9px;
+    border-bottom: 2px solid transparent;
+    border-radius: 6px 6px 0 0;
   }
+  .file-chip:hover { color: var(--ed-ink); }
+  .file-chip.active { color: var(--ed-ink); background: var(--ed-bg); border-bottom-color: var(--accent); }
   .panel-head .spacer { flex: 1; }
   .btn-ghost {
     border: 1px solid rgba(255,255,255,.14); border-radius: 6px;
@@ -323,6 +365,19 @@
   @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .35 } }
   .preview-panel iframe { flex: 1; width: 100%; min-height: 0; border: none; background: #fff; }
 
+  /* Toast */
+  .toast {
+    position: fixed; right: 18px; bottom: 18px; z-index: 100;
+    background: var(--ink); color: var(--bg);
+    font-size: 13px; font-weight: 700;
+    padding: 11px 18px; border-radius: 10px;
+    box-shadow: var(--shadow);
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none; max-width: min(80vw, 380px);
+  }
+  .toast.show { opacity: 1; transform: none; }
+
   /* Confetti */
   .confetti-piece {
     position: fixed; top: -24px; z-index: 99;
@@ -335,12 +390,13 @@
   @media (prefers-reduced-motion: reduce) {
     .confetti-piece { display: none; }
     .live-dot { animation: none; }
-    .checks li, .checks li .mark, .progress-chip .bar i { transition: none; }
+    .checks li, .checks li .mark, .progress-chip .bar i, .toast { transition: none; }
   }
 
   /* Responsive */
   @media (max-width: 920px) {
     .app { height: auto; min-height: 100vh; }
+    .topbar { flex-wrap: wrap; height: auto; padding: 10px 16px; row-gap: 8px; }
     .main { grid-template-columns: 1fr; }
     .rail { border-right: none; border-bottom: 1px solid var(--line); overflow: visible; }
     .bench { grid-template-rows: none; }
@@ -357,8 +413,9 @@
       <span>書いたコードが、すぐ動く。</span>
     </div>
     <div class="topbar-spacer"></div>
+    <div class="badges" id="badgeRow" aria-label="獲得バッジ"></div>
     <div class="progress-chip" id="progressChip">
-      <span id="progressText">クリア 0 / 2</span>
+      <span id="progressText">クリア 0 / 6</span>
       <span class="bar"><i id="progressBar"></i></span>
     </div>
   </header>
@@ -372,10 +429,18 @@
       <section class="card task" aria-label="課題">
         <div class="task-head">
           <h3 id="taskTitle">課題</h3>
-          <span class="sub">コードを書くと自動で判定されます</span>
+          <span class="sub" id="taskSub">コードを書くと自動で判定されます</span>
         </div>
         <p class="goal" id="taskGoal"></p>
         <ul class="checks" id="checkList" aria-live="polite"></ul>
+        <div class="share-row" id="shareRow" hidden>
+          <button class="btn-share" id="shareBtn" type="button">🔗 共有リンクをコピー</button>
+          <span class="share-note">作品がURLに埋め込まれ、そのまま送れます</span>
+        </div>
+        <div class="advice" id="adviceBox" hidden>
+          <div class="advice-title">🔍 つまずきヒント</div>
+          <ul id="adviceList"></ul>
+        </div>
         <details id="hintBox">
           <summary>ヒントを見る（書き方の例）</summary>
           <pre id="hintCode"></pre>
@@ -391,12 +456,15 @@
       <div class="panel editor-panel">
         <div class="panel-head">
           <span>エディタ</span>
-          <span class="file-chip">index.html</span>
+          <div class="file-tabs" role="tablist">
+            <button class="file-chip active" id="tabHtml" type="button" role="tab" aria-selected="true">index.html</button>
+            <button class="file-chip" id="tabCss" type="button" role="tab" aria-selected="false">style.css</button>
+          </div>
           <span class="spacer"></span>
           <button class="btn-ghost" id="resetBtn" type="button">最初のコードに戻す</button>
         </div>
         <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
-          aria-label="HTMLコード入力エリア" placeholder="ここにHTMLを書いてみよう"></textarea>
+          aria-label="コード入力エリア" placeholder="ここにコードを書いてみよう"></textarea>
       </div>
 
       <div class="panel preview-panel">
@@ -413,9 +481,13 @@
   </div>
 </div>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
 (function () {
   "use strict";
+
+  var DEFAULT_CSS = "/* style.css — CSSはStep 5で学びます。先に書いてみてもOK！ */\n";
 
   /* ── ステップ定義 ─────────────────────── */
   var STEPS = [
@@ -445,7 +517,7 @@
           } }
       ],
       hint: "<h1>山田太郎のページ</h1>\n<h2>好きなこと</h2>\n<p>週末はパン作りをしています。</p>\n<p>最近はクロワッサンに挑戦中です。</p>",
-      starter: "<!-- ここに自己紹介ページを書いてみよう。まずは <h1> から！ -->\n\n"
+      starter: { h: "<!-- ここに自己紹介ページを書いてみよう。まずは <h1> から！ -->\n\n", c: DEFAULT_CSS }
     },
     {
       id: 2,
@@ -490,17 +562,167 @@
           } }
       ],
       hint: "<h1>わたしの好きなもの</h1>\n<p>いちばん好きなサイトはここです。</p>\n<a href=\"https://example.com\">おすすめのサイト</a>\n<img src=\"cat.jpg\" alt=\"ひなたぼっこする猫\">",
-      starter: "<h1>わたしの好きなもの</h1>\n<!-- ここにリンクと画像を追加しよう -->\n\n"
+      starter: { h: "<h1>わたしの好きなもの</h1>\n<!-- ここにリンクと画像を追加しよう -->\n\n", c: DEFAULT_CSS }
+    },
+    {
+      id: 3,
+      label: "リストとテーブル",
+      eyebrow: "Step 3 / Lists & Tables",
+      title: "リストとテーブル — 情報を整理する",
+      lesson: [
+        "<p>箇条書きは <code>&lt;ul&gt;</code>（黒丸のリスト）または <code>&lt;ol&gt;</code>（番号つきリスト）で作ります。中の1行1行は <code>&lt;li&gt;</code> です。</p>",
+        "<pre><span class='t'>&lt;ul&gt;</span>\n  <span class='t'>&lt;li&gt;</span>寿司<span class='t'>&lt;/li&gt;</span>\n  <span class='t'>&lt;li&gt;</span>ラーメン<span class='t'>&lt;/li&gt;</span>\n<span class='t'>&lt;/ul&gt;</span></pre>",
+        "<p>表は <code>&lt;table&gt;</code> で作ります。<code>&lt;tr&gt;</code> が「行」、その中に入れる <code>&lt;th&gt;</code> が「見出しセル（太字）」、<code>&lt;td&gt;</code> が「ふつうのセル」。行の中にセルを並べる、という<strong>入れ子の構造</strong>がポイントです。</p>",
+        "<pre><span class='t'>&lt;table&gt;</span>\n  <span class='t'>&lt;tr&gt;</span><span class='t'>&lt;th&gt;</span>名前<span class='t'>&lt;/th&gt;</span><span class='t'>&lt;th&gt;</span>点数<span class='t'>&lt;/th&gt;</span><span class='t'>&lt;/tr&gt;</span>\n  <span class='t'>&lt;tr&gt;</span><span class='t'>&lt;td&gt;</span>寿司<span class='t'>&lt;/td&gt;</span><span class='t'>&lt;td&gt;</span>95点<span class='t'>&lt;/td&gt;</span><span class='t'>&lt;/tr&gt;</span>\n<span class='t'>&lt;/table&gt;</span></pre>",
+        "<div class='note'>💡 タグの中にタグを入れるときは、字下げ（インデント）すると構造が見やすくなります。Tabキーで字下げできます。</div>"
+      ].join(""),
+      goal: "「好きな食べものランキング」を、リストと表を使って作ってみましょう。",
+      checks: [
+        { html: "<b>&lt;ul&gt;</b> か <b>&lt;ol&gt;</b> で、<b>&lt;li&gt;</b> が2つ以上あるリストを作る",
+          test: function (d) {
+            var n = 0, lis = d.querySelectorAll("ul li, ol li");
+            for (var i = 0; i < lis.length; i++) if (lis[i].textContent.trim()) n++;
+            return n >= 2;
+          } },
+        { html: "<b>&lt;table&gt;</b> で表を作り、行 <b>&lt;tr&gt;</b> を2つ以上入れる",
+          test: function (d) { return d.querySelectorAll("table tr").length >= 2; } },
+        { html: "<b>&lt;th&gt;</b> で表の見出しセルを作る",
+          test: function (d) {
+            var th = d.querySelector("table th");
+            return !!th && th.textContent.trim().length > 0;
+          } }
+      ],
+      hint: "<h2>ベスト3</h2>\n<ul>\n  <li>寿司</li>\n  <li>ラーメン</li>\n  <li>カレー</li>\n</ul>\n<table>\n  <tr><th>名前</th><th>点数</th></tr>\n  <tr><td>寿司</td><td>95点</td></tr>\n</table>",
+      starter: { h: "<h1>好きな食べもの ランキング</h1>\n<!-- ここにリストと表を作ってみよう -->\n\n", c: DEFAULT_CSS }
+    },
+    {
+      id: 4,
+      label: "フォーム入門",
+      eyebrow: "Step 4 / Forms",
+      title: "フォーム入門 — 入力できるページ",
+      lesson: [
+        "<p>ユーザーに入力してもらう部品を「フォーム」と呼びます。1行の入力欄は <code>&lt;input&gt;</code>（終了タグのない空要素）で、<code>type</code> 属性で種類を切り替えます。<code>placeholder</code> は入力欄にうすく表示されるヒント文字です。</p>",
+        "<pre><span class='t'>&lt;input</span> <span class='a'>type</span>=<span class='a'>\"text\"</span> <span class='a'>placeholder</span>=<span class='a'>\"山田太郎\"</span><span class='t'>&gt;</span></pre>",
+        "<p><code>&lt;label&gt;</code> は入力欄の「名前ふだ」、<code>&lt;button&gt;</code> はボタンです。セットで使うと、なにを入力する欄なのかが伝わるフォームになります。</p>",
+        "<pre><span class='t'>&lt;label&gt;</span>お名前<span class='t'>&lt;/label&gt;</span>\n<span class='t'>&lt;input</span> <span class='a'>type</span>=<span class='a'>\"text\"</span> <span class='a'>placeholder</span>=<span class='a'>\"山田太郎\"</span><span class='t'>&gt;</span>\n<span class='t'>&lt;button&gt;</span>送信する<span class='t'>&lt;/button&gt;</span></pre>",
+        "<div class='note'>💡 <code>type=\"color\"</code> や <code>type=\"date\"</code> にすると、色や日付を選ぶ部品に変身します。プレビューで押して試してみて！（このラボでは送信先がないので、ボタンを押しても送信はされません）</div>"
+      ].join(""),
+      goal: "「アンケートページ」を作って、入力欄・名前ふだ・ボタンを置いてみましょう。",
+      checks: [
+        { html: "<b>&lt;input&gt;</b> で入力欄を作る",
+          test: function (d) { return !!d.querySelector("input"); } },
+        { html: "<b>&lt;label&gt;</b> で入力欄の名前ふだをつける",
+          test: function (d) {
+            var el = d.querySelector("label");
+            return !!el && el.textContent.trim().length > 0;
+          } },
+        { html: "<b>&lt;button&gt;</b> でボタンを作る（中に文字を入れる）",
+          test: function (d) {
+            var el = d.querySelector("button");
+            return !!el && el.textContent.trim().length > 0;
+          } }
+      ],
+      hint: "<h2>参加アンケート</h2>\n<label>お名前</label>\n<input type=\"text\" placeholder=\"山田太郎\">\n<label>好きな色</label>\n<input type=\"color\">\n<button>送信する</button>",
+      starter: { h: "<h1>アンケート</h1>\n<!-- 入力欄とボタンを作ってみよう -->\n\n", c: DEFAULT_CSS }
+    },
+    {
+      id: 5,
+      label: "CSSで色と文字",
+      eyebrow: "Step 5 / CSS Colors & Type",
+      title: "CSSで色と文字 — ページに着替えを",
+      tab: "c",
+      lesson: [
+        "<p>ここからはCSS！ HTMLが「構造」の言語なら、CSSは「見た目」の言語です。エディタの <strong>style.css</strong> タブに切り替えて書きます。書き方は3点セット：「どこを（セレクタ）」「なにを（プロパティ）」「どうする（値）」。</p>",
+        "<pre><span class='t'>セレクタ</span> {\n  <span class='a'>プロパティ</span>: 値;\n}</pre>",
+        "<p>文字の色は <code>color</code>、背景の色は <code>background</code>、文字の大きさは <code>font-size</code> で変えられます。セレクタにタグ名を書くと、そのタグ全部にスタイルが当たります。</p>",
+        "<pre><span class='t'>h1</span> {\n  <span class='a'>color</span>: #D6491F;\n  <span class='a'>font-size</span>: 40px;\n}\n<span class='t'>body</span> {\n  <span class='a'>background</span>: #FFF6EC;\n}</pre>",
+        "<div class='note'>💡 色は <code>red</code> のような名前でも、<code>#D6491F</code> のようなカラーコードでもOK。HTMLタブにはひな形を用意してあるので、そのまま使えます。</div>"
+      ].join(""),
+      goal: "style.cssタブで、カフェのページに色と大きさの「着替え」をさせましょう。",
+      checks: [
+        { html: "<b>h1</b> に <b>color</b> で文字色をつける",
+          test: function (d, h, c) { return /h1[^{}]*\{[^}]*color\s*:/i.test(c); } },
+        { html: "<b>font-size</b> で文字の大きさを変える",
+          test: function (d, h, c) { return /font-size\s*:/i.test(c); } },
+        { html: "<b>body</b> に <b>background</b> で背景色をつける",
+          test: function (d, h, c) { return /body[^{}]*\{[^}]*background(?:-color)?\s*:/i.test(c); } }
+      ],
+      hint: "body {\n  background: #FFF6EC;\n}\nh1 {\n  color: #D6491F;\n  font-size: 40px;\n}",
+      starter: {
+        h: "<h1>カフェ・ラボ</h1>\n<p>あたらしい風味の実験室。</p>\n<p>本日のおすすめ：橙のタルト</p>\n",
+        c: "/* ここにCSSを書いてみよう。まずは h1 の色から！ */\n\n"
+      }
+    },
+    {
+      id: 6,
+      label: "余白とボックス",
+      eyebrow: "Step 6 / CSS Box Model",
+      title: "余白とボックス — 整ったカードを作る",
+      tab: "c",
+      lesson: [
+        "<p>HTMLの要素は、じつはぜんぶ「箱」でできています。箱の<strong>内側の余白</strong>が <code>padding</code>、<strong>外側の余白</strong>が <code>margin</code>、箱の<strong>ふち線</strong>が <code>border</code>、角を丸くするのが <code>border-radius</code> です。</p>",
+        "<pre><span class='t'>.card</span> {\n  <span class='a'>padding</span>: 24px;             <span class='c'>/* 内側の余白 */</span>\n  <span class='a'>border</span>: 2px solid #D6491F; <span class='c'>/* 太さ 種類 色 */</span>\n  <span class='a'>border-radius</span>: 12px;       <span class='c'>/* 角を丸く */</span>\n}</pre>",
+        "<p>セレクタの頭にドットをつけた <code>.card</code> は「クラスセレクタ」。HTML側で <code>class=\"card\"</code> とつけた要素だけにスタイルが当たります。タグ全部ではなく「この箱だけ」を狙えるのが便利なところ。</p>",
+        "<div class='note'>💡 HTMLタブに <code>class=\"card\"</code> つきの箱を用意してあります。style.cssタブで、会員カードらしく仕上げましょう。</div>"
+      ].join(""),
+      goal: "style.cssタブで .card に余白とふち線をつけて、カードらしく整えましょう。",
+      checks: [
+        { html: "<b>padding</b> で内側に余白をつける",
+          test: function (d, h, c) { return /(?:^|[;{\s])padding[^:;{}]*:/i.test(c); } },
+        { html: "<b>border</b> でふち線をつける（例：2px solid red）",
+          test: function (d, h, c) { return /(?:^|[;{\s])border\s*:/i.test(c); } },
+        { html: "<b>border-radius</b> で角を丸くする",
+          test: function (d, h, c) { return /border-radius\s*:/i.test(c); } }
+      ],
+      hint: ".card {\n  background: #FFF6EC;\n  padding: 24px;\n  border: 2px solid #D6491F;\n  border-radius: 12px;\n}",
+      starter: {
+        h: "<div class=\"card\">\n  <h2>会員カード</h2>\n  <p>HTMLラボ 研究員：あなたの名前</p>\n</div>\n",
+        c: ".card {\n  background: #FFF6EC;\n  /* ここに padding / border / border-radius を足そう */\n}\n"
+      }
     }
   ];
-  var COMING_SOON = { id: 3, label: "リストとテーブル（準備中）" };
+
+  var SANDBOX = {
+    id: "free",
+    label: "自由制作",
+    eyebrow: "Free Mode / Sandbox",
+    title: "自由制作モード — 学んだことで作品づくり",
+    lesson: [
+      "<p>ここには課題がありません。見出し、リンク、画像、リスト、表、フォーム、CSS……学んだ道具をぜんぶ使って、好きなページを作ってください。</p>",
+      "<p>できあがったら下の「共有リンクをコピー」を押しましょう。作品がURLの中に埋め込まれるので、リンクを送るだけで相手のブラウザにあなたの作品が開きます。</p>",
+      "<div class='note'>💡 なにを作るか迷ったら：「架空のお店の紹介ページ」「推しの紹介」「今週の時間割（表で！）」など。</div>"
+    ].join(""),
+    starter: {
+      h: "<h1>じゆうけんきゅう</h1>\n<p>ここは自由制作スペース。学んだタグで作品を作ろう！</p>\n\n",
+      c: "/* CSSも自由に使えます */\nh1 {\n  color: #D6491F;\n}\n"
+    }
+  };
+
+  var BADGES = [
+    { n: 1, emoji: "🌱", name: "はじめの一歩" },
+    { n: 3, emoji: "🔧", name: "タグ職人" },
+    { n: 6, emoji: "🏆", name: "ラボ・マスター" }
+  ];
 
   /* ── 状態と保存 ───────────────────────── */
-  var KEY = "htmllab-v1";
-  var state = { current: 1, cleared: {}, code: {} };
+  var KEY = "htmllab-v2";
+  var state = { current: 1, cleared: {}, code: {}, badges: [] };
   try {
     var saved = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (saved && saved.code) state = saved;
+    if (saved && saved.code) {
+      state = saved;
+      if (!state.badges) state.badges = [];
+    } else {
+      // 旧バージョン（v1: コードがHTML文字列のみ）からの引き継ぎ
+      var v1 = JSON.parse(localStorage.getItem("htmllab-v1") || "null");
+      if (v1 && v1.code) {
+        state.current = v1.current || 1;
+        state.cleared = v1.cleared || {};
+        for (var k in v1.code) {
+          if (typeof v1.code[k] === "string") state.code[k] = { h: v1.code[k], c: DEFAULT_CSS };
+        }
+      }
+    }
   } catch (e) { /* 保存データが壊れていたら初期状態から */ }
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* プライベートモード等では保存しない */ }
@@ -510,18 +732,32 @@
   var $ = function (id) { return document.getElementById(id); };
   var editor = $("editor"), preview = $("preview");
   var stepNav = $("stepNav"), lessonCard = $("lessonCard");
-  var taskGoal = $("taskGoal"), checkList = $("checkList");
-  var hintCode = $("hintCode"), clearBanner = $("clearBanner"), clearMsg = $("clearMsg");
+  var taskTitle = $("taskTitle"), taskSub = $("taskSub"), taskGoal = $("taskGoal");
+  var checkList = $("checkList"), adviceBox = $("adviceBox"), adviceList = $("adviceList");
+  var hintBox = $("hintBox"), hintCode = $("hintCode");
+  var clearBanner = $("clearBanner"), clearMsg = $("clearMsg");
   var nextBtn = $("nextBtn"), resetBtn = $("resetBtn");
+  var shareRow = $("shareRow"), shareBtn = $("shareBtn");
+  var tabHtml = $("tabHtml"), tabCss = $("tabCss");
   var progressText = $("progressText"), progressBar = $("progressBar");
+  var badgeRow = $("badgeRow"), toast = $("toast");
 
+  var currentTab = "h"; // 'h' = index.html / 'c' = style.css
+
+  function isFree() { return state.current === "free"; }
   function currentStep() {
+    if (isFree()) return SANDBOX;
     for (var i = 0; i < STEPS.length; i++) if (STEPS[i].id === state.current) return STEPS[i];
     return STEPS[0];
   }
+  function buf() {
+    var id = state.current, step = currentStep();
+    if (!state.code[id]) state.code[id] = { h: step.starter.h, c: step.starter.c };
+    return state.code[id];
+  }
 
   /* ── プレビュー ───────────────────────── */
-  function buildPreviewDoc(code) {
+  function buildPreviewDoc(html, css) {
     var fallback =
       "document.addEventListener('error',function(e){" +
       "var t=e.target;" +
@@ -539,8 +775,55 @@
       "padding:20px 24px;line-height:1.85;font-size:15px}" +
       "img{max-width:100%}a{color:#C2410C}" +
       "table{border-collapse:collapse}td,th{border:1px solid #D8D2C6;padding:6px 12px}" +
-      "</style></head><body>" + code +
+      "input,button{font:inherit;padding:6px 10px}" +
+      "</style><style>" + css + "</style></head><body>" + html +
       "<scr" + "ipt>" + fallback + "</scr" + "ipt></body></html>";
+  }
+
+  /* ── つまずき診断 ─────────────────────── */
+  var PAIRED = ["h1","h2","h3","h4","h5","h6","p","a","ul","ol","li","table","tr","td","th",
+                "strong","em","div","span","form","label","button","header","footer","nav","main","section"];
+  function diagnose(html, css, doc) {
+    var msgs = [];
+    var src = html.replace(/<!--[\s\S]*?-->/g, ""); // コメント内の例は対象外
+
+    if (/[＜＞“”‘’]/.test(src)) {
+      msgs.push("全角の記号（＜ ＞ ” など）が入っています。タグや引用符は半角（< > \"）で書きましょう。");
+    }
+    if (/<image[\s>]/i.test(src)) {
+      msgs.push("<image> というタグはありません。画像のタグは <img> です。");
+    }
+    for (var i = 0; i < PAIRED.length; i++) {
+      var t = PAIRED[i];
+      var open = (src.match(new RegExp("<" + t + "(?=[\\s/>])", "gi")) || []).length;
+      var close = (src.match(new RegExp("</" + t + "\\s*>", "gi")) || []).length;
+      if (open > close) {
+        msgs.push("<" + t + "> の終了タグ </" + t + "> が見つかりません。閉じ忘れていませんか？");
+      } else if (close > open) {
+        msgs.push("</" + t + "> が多いようです。開始タグ <" + t + "> とセットになっているか確認しましょう。");
+      }
+      if (msgs.length >= 3) return msgs.slice(0, 3);
+    }
+    if (/<[a-z][^>]*\s(?:href|src|alt|type|class|id|placeholder)\s*=\s*[^"'\s>][^\s>]*/i.test(src)) {
+      msgs.push("属性の値は引用符で囲みましょう（例：href=\"https://example.com\"）。");
+    }
+    var imgs = doc.querySelectorAll("img");
+    for (var j = 0; j < imgs.length; j++) {
+      if (imgs[j].getAttribute("src") && imgs[j].getAttribute("alt") === null) {
+        msgs.push("<img> には alt=\"説明\" をつけると、画像が見られない人にも内容が伝わります。");
+        break;
+      }
+    }
+    // CSS側のチェック
+    var cssSrc = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    var ob = (cssSrc.match(/\{/g) || []).length, cb = (cssSrc.match(/\}/g) || []).length;
+    if (ob !== cb) {
+      msgs.push("style.css の { と } の数が合いません。閉じカッコを確認しましょう。");
+    }
+    if (/[＜＞：；”]/.test(cssSrc)) {
+      msgs.push("style.css に全角の記号が入っています。: や ; は半角で書きましょう。");
+    }
+    return msgs.slice(0, 3);
   }
 
   /* ── 描画 ─────────────────────────────── */
@@ -557,19 +840,57 @@
       b.addEventListener("click", function () { openStep(s.id); });
       stepNav.appendChild(b);
     });
-    var soon = document.createElement("button");
-    soon.type = "button";
-    soon.className = "step-pill";
-    soon.disabled = true;
-    soon.innerHTML = "<span class='num'>" + COMING_SOON.id + "</span>" + COMING_SOON.label;
-    stepNav.appendChild(soon);
+    var freeBtn = document.createElement("button");
+    freeBtn.type = "button";
+    freeBtn.className = "step-pill free" + (isFree() ? " active" : "");
+    freeBtn.innerHTML = "<span class='num'>🎨</span>" + SANDBOX.label;
+    freeBtn.addEventListener("click", function () { openStep("free"); });
+    stepNav.appendChild(freeBtn);
+  }
+
+  function clearedCount() {
+    var n = 0;
+    STEPS.forEach(function (s) { if (state.cleared[s.id]) n++; });
+    return n;
   }
 
   function renderProgress() {
-    var done = 0;
-    STEPS.forEach(function (s) { if (state.cleared[s.id]) done++; });
+    var done = clearedCount();
     progressText.textContent = "クリア " + done + " / " + STEPS.length;
     progressBar.style.width = (done / STEPS.length * 100) + "%";
+  }
+
+  function renderBadges() {
+    var done = clearedCount();
+    badgeRow.innerHTML = "";
+    BADGES.forEach(function (b) {
+      var el = document.createElement("span");
+      var earned = done >= b.n;
+      el.className = "badge " + (earned ? "earned" : "locked");
+      el.textContent = b.emoji;
+      el.title = b.name + (earned ? "（獲得済み）" : "（" + b.n + "ステップクリアで獲得）");
+      badgeRow.appendChild(el);
+    });
+  }
+
+  function checkBadges() {
+    var done = clearedCount();
+    BADGES.forEach(function (b) {
+      if (done >= b.n && state.badges.indexOf(b.n) === -1) {
+        state.badges.push(b.n);
+        showToast("🏅 バッジ獲得：" + b.name + " " + b.emoji);
+      }
+    });
+    save();
+    renderBadges();
+  }
+
+  var toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 3200);
   }
 
   function renderChecks(results) {
@@ -582,13 +903,31 @@
     });
   }
 
+  function renderAdvice(msgs) {
+    adviceBox.hidden = msgs.length === 0;
+    adviceList.innerHTML = "";
+    msgs.forEach(function (m) {
+      var li = document.createElement("li");
+      li.textContent = m; // タグ名を含むので textContent で安全に表示
+      adviceList.appendChild(li);
+    });
+  }
+
   /* ── 判定 ─────────────────────────────── */
   var parser = new DOMParser();
   function evaluate() {
     var step = currentStep();
-    var doc = parser.parseFromString(editor.value, "text/html");
+    var b = buf();
+    var doc = parser.parseFromString(b.h, "text/html");
+    renderAdvice(diagnose(b.h, b.c, doc));
+
+    if (isFree()) {
+      clearBanner.classList.remove("show");
+      return;
+    }
+
     var results = step.checks.map(function (c) {
-      try { return !!c.test(doc); } catch (e) { return false; }
+      try { return !!c.test(doc, b.h, b.c); } catch (e) { return false; }
     });
     renderChecks(results);
 
@@ -599,26 +938,22 @@
       renderNav();
       renderProgress();
       celebrate();
+      checkBadges();
     }
     updateBanner(all);
   }
 
   function updateBanner(allPass) {
     var step = currentStep();
-    var show = allPass || state.cleared[step.id];
+    var show = !isFree() && (allPass || state.cleared[step.id]);
     clearBanner.classList.toggle("show", !!show);
     if (!show) return;
     var isLast = step.id === STEPS[STEPS.length - 1].id;
-    if (isLast) {
-      var allDone = STEPS.every(function (s) { return state.cleared[s.id]; });
-      clearMsg.textContent = allDone
-        ? "全ステップクリア！おつかれさまでした 🎉"
-        : "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
-      nextBtn.style.display = "none";
-    } else {
-      clearMsg.textContent = "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
-      nextBtn.style.display = "";
-    }
+    var allDone = STEPS.every(function (s) { return state.cleared[s.id]; });
+    clearMsg.textContent = (isLast && allDone)
+      ? "全ステップクリア！おつかれさまでした 🎉"
+      : "クリア！ Step " + step.id + "「" + step.label + "」達成 🎉";
+    nextBtn.textContent = isLast ? "自由制作モードへ 🎨" : "次のステップへ →";
   }
 
   /* ── 紙吹雪 ───────────────────────────── */
@@ -640,6 +975,39 @@
     }
   }
 
+  /* ── 共有リンク ───────────────────────── */
+  function encodeShare(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+  function decodeShare(s) { return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+
+  shareBtn.addEventListener("click", function () {
+    var b = buf();
+    var hash = "#share=" + encodeShare({ h: b.h, c: b.c });
+    try { history.replaceState(null, "", hash); } catch (e) { location.hash = hash; }
+    var url = location.href;
+    function done() { showToast("🔗 共有リンクをコピーしました！そのまま送れます"); }
+    function fail() { showToast("コピーできませんでした。アドレスバーのURLを直接コピーしてください"); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, fail);
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy") ? done() : fail(); } catch (e) { fail(); }
+      ta.remove();
+    }
+  });
+
+  /* ── エディタタブ ─────────────────────── */
+  function setTab(tab) {
+    currentTab = tab;
+    tabHtml.classList.toggle("active", tab === "h");
+    tabCss.classList.toggle("active", tab === "c");
+    tabHtml.setAttribute("aria-selected", tab === "h" ? "true" : "false");
+    tabCss.setAttribute("aria-selected", tab === "c" ? "true" : "false");
+    editor.value = buf()[tab];
+  }
+  tabHtml.addEventListener("click", function () { if (currentTab !== "h") setTab("h"); });
+  tabCss.addEventListener("click", function () { if (currentTab !== "c") setTab("c"); });
+
   /* ── ステップ切り替え ─────────────────── */
   function openStep(id) {
     state.current = id;
@@ -648,10 +1016,25 @@
     lessonCard.innerHTML =
       "<div class='eyebrow'>" + step.eyebrow + "</div>" +
       "<h2>" + step.title + "</h2>" + step.lesson;
-    taskGoal.textContent = step.goal;
-    hintCode.textContent = step.hint;
-    $("hintBox").open = false;
-    editor.value = (state.code[id] != null) ? state.code[id] : step.starter;
+
+    if (isFree()) {
+      taskTitle.textContent = "つくる → 共有する";
+      taskSub.textContent = "自由制作モード";
+      taskGoal.textContent = "作品ができたら、共有リンクで友だちに送ってみましょう。";
+      checkList.innerHTML = "";
+      shareRow.hidden = false;
+      hintBox.hidden = true;
+    } else {
+      taskTitle.textContent = "課題";
+      taskSub.textContent = "コードを書くと自動で判定されます";
+      taskGoal.textContent = step.goal;
+      shareRow.hidden = true;
+      hintBox.hidden = false;
+      hintCode.textContent = step.hint;
+      hintBox.open = false;
+    }
+
+    setTab(step.tab === "c" ? "c" : "h");
     renderNav();
     renderProgress();
     refresh(true);
@@ -662,9 +1045,10 @@
   function refresh(immediate) {
     clearTimeout(timer);
     timer = setTimeout(function () {
-      state.code[state.current] = editor.value;
+      var b = buf();
+      b[currentTab] = editor.value;
       save();
-      preview.srcdoc = buildPreviewDoc(editor.value);
+      preview.srcdoc = buildPreviewDoc(b.h, b.c);
       evaluate();
     }, immediate ? 0 : 180);
   }
@@ -680,17 +1064,38 @@
     }
   });
   resetBtn.addEventListener("click", function () {
-    editor.value = currentStep().starter;
+    var step = currentStep();
+    state.code[state.current] = { h: step.starter.h, c: step.starter.c };
+    editor.value = buf()[currentTab];
     refresh(true);
     editor.focus();
   });
   nextBtn.addEventListener("click", function () {
-    var idx = STEPS.findIndex(function (s) { return s.id === state.current; });
-    if (idx < STEPS.length - 1) openStep(STEPS[idx + 1].id);
+    var idx = -1;
+    STEPS.forEach(function (s, i) { if (s.id === state.current) idx = i; });
+    if (idx >= 0 && idx < STEPS.length - 1) openStep(STEPS[idx + 1].id);
+    else openStep("free");
   });
 
   /* ── 起動 ─────────────────────────────── */
-  openStep(state.current === 2 ? 2 : 1);
+  var opened = false;
+  if (location.hash.indexOf("#share=") === 0) {
+    try {
+      var shared = decodeShare(location.hash.slice(7));
+      if (shared && typeof shared.h === "string") {
+        state.code.free = { h: shared.h, c: typeof shared.c === "string" ? shared.c : "" };
+        openStep("free");
+        showToast("🎁 共有された作品を開きました！自由に編集できます");
+        opened = true;
+      }
+    } catch (e) { /* 壊れた共有リンクは無視して通常起動 */ }
+  }
+  if (!opened) {
+    var valid = state.current === "free" ||
+      STEPS.some(function (s) { return s.id === state.current; });
+    openStep(valid ? state.current : 1);
+  }
+  renderBadges();
 })();
 </script>
 </body>
